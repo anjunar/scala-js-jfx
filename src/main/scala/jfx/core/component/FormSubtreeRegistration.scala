@@ -1,13 +1,16 @@
 package jfx.core.component
 
-import jfx.form.{Control, Formular}
-import org.scalajs.dom.Node
+import jfx.form.{ArrayForm, Control, Formular, Model}
+import org.scalajs.dom.{HTMLFieldSetElement, Node}
 
 trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
 
   protected def enclosingFormOption(): Option[Formular[?,?]] =
     this match {
-      case _: FormRegistrationBoundary => None
+      case arrayForm : ArrayForm[?] => Some(new Formular[?, HTMLFieldSetElement] {
+        override val name: String = arrayForm.name
+        override lazy val element: HTMLFieldSetElement = arrayForm.element
+      })
       case form: Formular[?,?] => Some(form)
       case _ => findParentFormOption()
     }

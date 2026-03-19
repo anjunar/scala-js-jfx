@@ -14,9 +14,9 @@ object Main {
   def main(args: Array[String]): Unit = {
 
     val address = Address(Property("Beim alten Schützenhof 28"), Property("Hamburg"))
-    
+
     val email = Email(Property("anjunar@gmx.de"))
-    
+
     val person = Person(Property("John"), Property("Doe"), Property(address), ListProperty(js.Array(email)))
 
     val opening = new Property(true)
@@ -62,13 +62,15 @@ object Main {
     toggle.addClick(_ => opening.set(!opening.get))
 
     val emails = new ArrayForm[Email]("emails")
-    
+
     emails.addControlRenderer(index => {
       val subForm = new SubForm[Email](index = index)
-      subForm.addChild(new Input("value"))
+      val container = new Div()
+      subForm.addChild(container)
+      container.addChild(new Input("value"))
       subForm
     })
-    
+
     container.addChild(emails)
 
     container.addChild(new ForEach[Int](list, (elem, index) => {
@@ -76,7 +78,7 @@ object Main {
       div2.textContent = elem.toString
       div2
     }))
-    
+
     dom.document.body.appendChild(div.element)
 
   }

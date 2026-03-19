@@ -52,18 +52,17 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
     val modelProperty: Any = control match {
       case subForm : SubForm[?] =>
         if (subForm.index > -1) {
-          val parent = control.findParentForm()
-          val parentParent = parent.findParentForm()
-          valueProperty.get.findProperty(parentParent.name).asInstanceOf[ListProperty[?]].get(subForm.index)
+          val parent = control.findParentForm().name
+          Property(valueProperty.get.findProperty(parent).asInstanceOf[ListProperty[?]].get(subForm.index))
         } else {
           valueProperty.get.findProperty(controlName)
         }
-      case _=> valueProperty.get.findProperty(controlName)
+      case _=> valueProperty.get.findProperty[Any](controlName)
     }
 
     val controlProperty: Any = control.valueProperty
 
-    if (modelProperty.isInstanceOf[ListProperty[?]] && controlProperty.isInstanceOf[ListProperty[?]]) {
+    if (controlProperty.isInstanceOf[ListProperty[?]]) {
       control.addDisposable(
         ListProperty.subscribeBidirectional(modelProperty.asInstanceOf[ListProperty[Any]], controlProperty.asInstanceOf[ListProperty[Any]])
       )

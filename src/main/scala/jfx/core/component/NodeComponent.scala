@@ -2,7 +2,7 @@ package jfx.core.component
 
 import jfx.core.state.{CompositeDisposable, Disposable}
 import jfx.form.{ArrayForm, Formular}
-import org.scalajs.dom.{Comment, Node}
+import org.scalajs.dom.{Comment, HTMLFieldSetElement, Node}
 
 trait NodeComponent [E <: Node] extends Disposable {
 
@@ -16,7 +16,10 @@ trait NodeComponent [E <: Node] extends Disposable {
       current match {
         case None => None
         case Some(form: Formular[?,?]) => Some(form)
-        case Some(arrayForm : ArrayForm[?]) => Some(arrayForm)
+        case Some(arrayForm : ArrayForm[?]) => Some(new Formular[?, HTMLFieldSetElement] {
+          override val name: String = arrayForm.name
+          override lazy val element: HTMLFieldSetElement = arrayForm.element
+        })
         case Some(component) => loop(component.parent)
       }
 
