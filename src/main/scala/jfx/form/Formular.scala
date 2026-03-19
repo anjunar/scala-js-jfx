@@ -1,9 +1,11 @@
 package jfx.form
 
 import jfx.core.component.{ChildrenComponent, NodeComponent}
-import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
+import jfx.core.state.{CompositeDisposable, ListProperty, Property, ReadOnlyProperty}
 import jfx.core.state.ListProperty.{Clear, Patch, RemoveAt, RemoveRange, UpdateAt}
 import org.scalajs.dom.{HTMLElement, Node, console}
+
+import scala.collection.mutable
 
 trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
 
@@ -11,42 +13,60 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
 
   val valueProperty : ReadOnlyProperty[M] = Property(null.asInstanceOf[M])
 
-  val controls : ListProperty[Control[?, ? <: HTMLElement]] =
-    new ListProperty[Control[?, ? <: HTMLElement]]()
+  type AnyControl = Control[?, ? <: HTMLElement]
+
+  val controls : ListProperty[AnyControl] =
+    new ListProperty[AnyControl]()
+
+  private val bindingsByControl: mutable.Map[AnyControl, CompositeDisposable] =
+    mutable.Map.empty
 
   private val controlObserver = controls.observeChanges(onFieldsChange)
+  addDisposable(controlObserver)
 
   def addControl(control : Control[?, ? <: HTMLElement]) : Unit = {
     if (!controls.contains(control)) {
       controls += control
 
-      bindOrDefer(control)
+      val binding = initBinding(control)
+      bindOrDefer(control, binding)
     }
   }
 
   def removeControl(control : Control[?, ? <: HTMLElement]) : Unit = {
+    disposeBinding(control)
     val idx = controls.indexOf(control)
     if (idx >= 0) controls.remove(idx)
   }
 
-  private def bindOrDefer(control: Control[?, ? <: HTMLElement]): Unit = {
+  private def initBinding(control: AnyControl): CompositeDisposable = {
+    bindingsByControl.remove(control).foreach(_.dispose())
+    val composite = new CompositeDisposable()
+    bindingsByControl.put(control, composite)
+    composite
+  }
+
+  private def disposeBinding(control: AnyControl): Unit =
+    bindingsByControl.remove(control).foreach(_.dispose())
+
+  private def bindOrDefer(control: AnyControl, binding: CompositeDisposable): Unit = {
     val currentModel = valueProperty.get
     if (currentModel != null) {
-      bindNow(control)
+      binding.add(bindNow(control))
       return
     }
 
     var observer: jfx.core.state.Disposable = null
     observer = valueProperty.observe { model =>
       if (model != null) {
-        bindNow(control)
+        binding.add(bindNow(control))
         if (observer != null) observer.dispose()
       }
     }
-    control.addDisposable(observer)
+    binding.add(observer)
   }
 
-  private def bindNow(control: Control[?, ? <: HTMLElement]): Unit = {
+  private def bindNow(control: AnyControl): jfx.core.state.Disposable = {
     val controlName = control.name
 
     val modelProperty: Any = control match {
@@ -63,23 +83,29 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
     val controlProperty: Any = control.valueProperty
 
     if (controlProperty.isInstanceOf[ListProperty[?]]) {
-      control.addDisposable(
-        ListProperty.subscribeBidirectional(modelProperty.asInstanceOf[ListProperty[Any]], controlProperty.asInstanceOf[ListProperty[Any]])
-      )
+      ListProperty.subscribeBidirectional(modelProperty.asInstanceOf[ListProperty[Any]], controlProperty.asInstanceOf[ListProperty[Any]])
     } else {
-      control.addDisposable(
-        Property.subscribeBidirectional(modelProperty.asInstanceOf[Property[Any]], controlProperty.asInstanceOf[Property[Any]])
-      )
+      Property.subscribeBidirectional(modelProperty.asInstanceOf[Property[Any]], controlProperty.asInstanceOf[Property[Any]])
     }
   }
 
   private def onFieldsChange(change: ListProperty.Change[Control[?, ? <: HTMLElement]]): Unit =
     change match {
-      case RemoveAt(_, control, _) => detachControl(control)
-      case RemoveRange(_, controls, _) => controls.foreach(detachControl)
-      case Patch(_, removed, _, _) => removed.foreach(detachControl)
-      case UpdateAt(_, oldControl, _, _) => detachControl(oldControl)
-      case Clear(removed, _) => removed.foreach(detachControl)
+      case RemoveAt(_, control, _) =>
+        disposeBinding(control)
+        detachControl(control)
+      case RemoveRange(_, removed, _) =>
+        removed.foreach(disposeBinding)
+        removed.foreach(detachControl)
+      case Patch(_, removed, _, _) =>
+        removed.foreach(disposeBinding)
+        removed.foreach(detachControl)
+      case UpdateAt(_, oldControl, _, _) =>
+        disposeBinding(oldControl)
+        detachControl(oldControl)
+      case Clear(removed, _) =>
+        removed.foreach(disposeBinding)
+        removed.foreach(detachControl)
       case _ => ()
     }
 
