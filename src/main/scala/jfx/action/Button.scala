@@ -1,10 +1,10 @@
 package jfx.action
 
-import jfx.core.component.Component
+import jfx.core.component.ElementComponent
 import jfx.core.state.Disposable
 import org.scalajs.dom.{Event, HTMLButtonElement}
 
-class Button extends Component[HTMLButtonElement] {
+class Button extends ElementComponent[HTMLButtonElement] {
 
   override lazy val element: HTMLButtonElement = newElement("button")
   

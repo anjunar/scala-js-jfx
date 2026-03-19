@@ -3,7 +3,7 @@ package jfx.core.component
 import jfx.core.state.Property
 import org.scalajs.dom.Node
 
-trait Component[E <: Node] extends NodeComponent[E] {
+trait ElementComponent[E <: Node] extends NodeComponent[E] {
 
   val textContentProperty = new Property[String]("")
 

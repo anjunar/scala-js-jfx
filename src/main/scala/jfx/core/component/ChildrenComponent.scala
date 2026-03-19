@@ -1,10 +1,10 @@
 package jfx.core.component
 
-import jfx.core.component.Component
+import jfx.core.component.ElementComponent
 import jfx.core.state.ListProperty
 import org.scalajs.dom.{HTMLElement, Node, console}
 
-trait ChildrenComponent[E <: Node] extends Component[E] {
+trait ChildrenComponent[E <: Node] extends ElementComponent[E] {
 
   val childrenProperty: ListProperty[NodeComponent[? <: Node]] =
     new ListProperty[NodeComponent[? <: Node]]()

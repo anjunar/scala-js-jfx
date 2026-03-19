@@ -1,24 +1,24 @@
 package jfx.statement
 
-import jfx.core.component.{Component, FormSubtreeRegistration, NodeComponent}
+import jfx.core.component.{ElementComponent, FormSubtreeRegistration, NodeComponent}
 import jfx.core.state.{ListProperty, ReadOnlyProperty}
 import org.scalajs.dom.{Comment, Node, console, window}
 
 
 class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponent[Comment], FormSubtreeRegistration {
 
-  val thenChildrenProperty: ListProperty[Component[? <: Node]] =
-    new ListProperty[Component[? <: Node]]()
+  val thenChildrenProperty: ListProperty[ElementComponent[? <: Node]] =
+    new ListProperty[ElementComponent[? <: Node]]()
 
-  val elseChildrenProperty: ListProperty[Component[? <: Node]] =
-    new ListProperty[Component[? <: Node]]()
+  val elseChildrenProperty: ListProperty[ElementComponent[? <: Node]] =
+    new ListProperty[ElementComponent[? <: Node]]()
 
   private val ifAnchor: Comment = newComment("jfx:if")
   private val elseAnchor: Comment = newComment("jfx:else")
   private val endAnchor: Comment = newComment("jfx:endif")
 
-  private var mountedThen: List[Component[? <: Node]] = Nil
-  private var mountedElse: List[Component[? <: Node]] = Nil
+  private var mountedThen: List[ElementComponent[? <: Node]] = Nil
+  private var mountedElse: List[ElementComponent[? <: Node]] = Nil
 
   override lazy val element: Comment = ifAnchor
 
@@ -60,10 +60,10 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
     rafId = window.requestAnimationFrame(( time: Double ) => tick( time))
   }
 
-  def thenAdd(child: Component[? <: Node]): Unit =
+  def thenAdd(child: ElementComponent[? <: Node]): Unit =
     thenChildrenProperty += child
 
-  def elseAdd(child: Component[? <: Node]): Unit =
+  def elseAdd(child: ElementComponent[? <: Node]): Unit =
     elseChildrenProperty += child
 
   override def dispose(): Unit = {
@@ -143,7 +143,7 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
     mountedElse = children
   }
 
-  private def mount(children: List[Component[? <: Node]], parent: Node, before: Node): Unit = {
+  private def mount(children: List[ElementComponent[? <: Node]], parent: Node, before: Node): Unit = {
     children.foreach { child =>
       val oldParent = child.parent
       if (oldParent.exists(_ != this)) {
