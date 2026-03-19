@@ -8,6 +8,7 @@ import jfx.statement.{Conditional, ForEach}
 import org.scalajs.dom
 
 import scala.scalajs.js
+import scala.scalajs.js.special.debugger
 
 object Main {
 
@@ -29,6 +30,14 @@ object Main {
     toggle.textContent = "Toggle"
     toggle.buttonType = "button"
 
+    val newEmail = new Button()
+    newEmail.textContent = "New Email"
+    newEmail.buttonType = "button"
+    newEmail.addClick(_ => {
+      println(person.emails)
+      person.emails.addOne(new Email(Property("test")))
+    })
+
     val form = new Form(person)
     val container = new Div()
 
@@ -42,18 +51,13 @@ object Main {
     val cityInput = new Input("city")
 
     container.addChild(toggle)
+    container.addChild(newEmail)
 
     div.addChild(form)
 
-    val conditional = new Conditional(opening)
-    conditional.thenAdd(firstNameInput)
-    conditional.thenAdd(lastNameInput)
+    container.addChild(firstNameInput)
+    container.addChild(lastNameInput)
 
-    val div1 = new Div()
-    div1.textContent = "Hello"
-    conditional.elseAdd(div1)
-
-    container.addChild(conditional)
     container.addChild(addressForm)
 
     addressForm.addChild(streetInput)
@@ -71,7 +75,9 @@ object Main {
       subForm
     })
 
-    container.addChild(emails)
+    val conditional = new Conditional(opening)
+    conditional.thenAdd(emails)
+    container.addChild(conditional)
 
     container.addChild(new ForEach[Int](list, (elem, index) => {
       val div2 = new Div()

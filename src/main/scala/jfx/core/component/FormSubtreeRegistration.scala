@@ -1,13 +1,13 @@
 package jfx.core.component
 
-import jfx.form.{Control, Formular}
+import jfx.form.{ArrayForm, Control, Formular}
 import org.scalajs.dom.Node
 
 trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
 
   protected def enclosingFormOption(): Option[Formular[?,?]] =
     this match {
-      case _: FormRegistrationBoundary => None
+      case _: ArrayForm[?] => None
       case form: Formular[?,?] => Some(form)
       case _ => findParentFormOption()
     }
@@ -26,7 +26,7 @@ trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
 
     val recurse =
       component match {
-        case _: FormRegistrationBoundary => false
+        case _: ArrayForm[?] => false
         case _: Formular[?, ?] => false
         case _ => true
       }
@@ -48,7 +48,7 @@ trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
 
     val recurse =
       component match {
-        case _: FormRegistrationBoundary => false
+        case _: ArrayForm[?] => false
         case _: Formular[?, ?] => false
         case _ => true
       }

@@ -174,30 +174,25 @@ object ListProperty {
   }
 
   private def applyChange[V](source: ListProperty[V], target: ListProperty[V], change: Change[V]): Unit =
-    try
-      change match {
-        case Reset(_) =>
-          resetFrom(target, source)
-        case Add(element, _) =>
-          target.addOne(element)
-        case Insert(index, element, _) =>
-          target.insert(index, element)
-        case InsertAll(index, elements, _) =>
-          target.insertAll(index, elements.toSeq)
-        case RemoveAt(index, _, _) =>
-          target.remove(index)
-        case RemoveRange(index, elements, _) =>
-          target.remove(index, elements.length)
-        case UpdateAt(index, _, newElement, _) =>
-          target.update(index, newElement)
-        case Patch(from, removed, inserted, _) =>
-          target.patchInPlace(from, inserted.toSeq, removed.length)
-        case Clear(_, _) =>
-          target.clear()
-      }
-    catch {
-      case NonFatal(_) =>
+    change match {
+      case Reset(_) =>
         resetFrom(target, source)
+      case Add(element, _) =>
+        target.addOne(element)
+      case Insert(index, element, _) =>
+        target.insert(index, element)
+      case InsertAll(index, elements, _) =>
+        target.insertAll(index, elements.toSeq)
+      case RemoveAt(index, _, _) =>
+        target.remove(index)
+      case RemoveRange(index, elements, _) =>
+        target.remove(index, elements.length)
+      case UpdateAt(index, _, newElement, _) =>
+        target.update(index, newElement)
+      case Patch(from, removed, inserted, _) =>
+        target.patchInPlace(from, inserted.toSeq, removed.length)
+      case Clear(_, _) =>
+        target.clear()
     }
 
   trait Change[V] {

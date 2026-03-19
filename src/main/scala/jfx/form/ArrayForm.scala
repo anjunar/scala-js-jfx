@@ -11,7 +11,6 @@ import scala.scalajs.js
 
 class ArrayForm[V <: Model[V]](val name: String)
     extends NativeComponent[HTMLFieldSetElement],
-      FormRegistrationBoundary,
       Control[js.Array[V], HTMLFieldSetElement] {
 
   override lazy val element: HTMLFieldSetElement = newElement("fieldset")
