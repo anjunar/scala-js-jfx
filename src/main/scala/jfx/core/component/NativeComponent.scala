@@ -2,54 +2,14 @@ package jfx.core.component
 
 import jfx.core.state.ListProperty
 import jfx.core.state.ListProperty.*
-import jfx.form.{Control, Formular}
 import org.scalajs.dom.{Element, HTMLElement, Node}
 
 import scala.scalajs.js
 
-trait NativeComponent[E <: Node] extends ChildrenComponent[E] {
+trait NativeComponent[E <: Node] extends ChildrenComponent[E], FormSubtreeRegistration {
 
   private val childrenObserver = childrenProperty.observeChanges(onChildrenChange)
-
   disposable.add(childrenObserver)
-  
-  private def enclosingFormOption(): Option[Formular] =
-    this match {
-      case form: Formular => Some(form)
-      case _ => findParentFormOption()
-    }
-
-  private def registerSubtree(component: NodeComponent[? <: Node]): Unit =
-    enclosingFormOption().foreach(form => registerSubtree(component, form))
-
-  private def registerSubtree(component: NodeComponent[? <: Node], form: Formular): Unit = {
-    component match {
-      case control: Control[?,?] => form.addControl(control)
-      case _ => ()
-    }
-
-    component match {
-      case children: ChildrenComponent[?] =>
-        children.childrenProperty.foreach(child => registerSubtree(child, form))
-      case _ => ()
-    }
-  }
-
-  private def unregisterSubtree(component: NodeComponent[? <: Node]): Unit =
-    enclosingFormOption().foreach(form => unregisterSubtree(component, form))
-
-  private def unregisterSubtree(component: NodeComponent[? <: Node], form: Formular): Unit = {
-    component match {
-      case control: Control[?,?] => form.removeControl(control)
-      case _ => ()
-    }
-
-    component match {
-      case children: ChildrenComponent[?] =>
-        children.childrenProperty.foreach(child => unregisterSubtree(child, form))
-      case _ => ()
-    }
-  }
 
   private def onChildrenChange(change: ListProperty.Change[NodeComponent[? <: Node]]): Unit =
     change match {

@@ -13,7 +13,6 @@ class Form[M <: Model[M]](model : M) extends NativeComponent[HTMLFormElement], F
     new ListProperty[Control[?, ? <: HTMLElement]]()
 
   private val fieldsObserver = fields.observeChanges(onFieldsChange)
-  disposable.add(fieldsObserver)
 
   override def addControl(control : Control[?, ? <: HTMLElement]) : Unit = {
     if (!fields.contains(control)) {

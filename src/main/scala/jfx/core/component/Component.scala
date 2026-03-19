@@ -10,7 +10,6 @@ trait Component[E <: Node] extends NodeComponent[E] {
   def newElement(tag: String): E = org.scalajs.dom.document.createElement(tag).asInstanceOf[E]
   
   private val textContentObserver = textContentProperty.observe { text => element.textContent = text }
-  disposable.add(textContentObserver)
 
   def textContent: String = textContentProperty.get
 

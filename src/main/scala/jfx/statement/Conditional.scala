@@ -1,12 +1,11 @@
 package jfx.statement
 
-import jfx.core.component.{ChildrenComponent, Component, NodeComponent}
+import jfx.core.component.{Component, FormSubtreeRegistration, NodeComponent}
 import jfx.core.state.{ListProperty, ReadOnlyProperty}
-import jfx.form.{Control, Formular}
 import org.scalajs.dom.{Comment, Node, console, window}
 
 
-class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponent[Comment] {
+class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponent[Comment], FormSubtreeRegistration {
 
   val thenChildrenProperty: ListProperty[Component[? <: Node]] =
     new ListProperty[Component[? <: Node]]()
@@ -206,38 +205,4 @@ class Conditional(val condition: ReadOnlyProperty[Boolean]) extends NodeComponen
     false
   }
 
-  private def enclosingFormOption(): Option[Formular] =
-    findParentFormOption()
-
-  private def registerSubtree(component: NodeComponent[? <: Node]): Unit =
-    enclosingFormOption().foreach(form => registerSubtree(component, form))
-
-  private def registerSubtree(component: NodeComponent[? <: Node], form: Formular): Unit = {
-    component match {
-      case control: Control[?, ?] => form.addControl(control)
-      case _ => ()
-    }
-
-    component match {
-      case children: ChildrenComponent[?] =>
-        children.childrenProperty.foreach(child => registerSubtree(child, form))
-      case _ => ()
-    }
-  }
-
-  private def unregisterSubtree(component: NodeComponent[? <: Node]): Unit =
-    enclosingFormOption().foreach(form => unregisterSubtree(component, form))
-
-  private def unregisterSubtree(component: NodeComponent[? <: Node], form: Formular): Unit = {
-    component match {
-      case control: Control[?, ?] => form.removeControl(control)
-      case _ => ()
-    }
-
-    component match {
-      case children: ChildrenComponent[?] =>
-        children.childrenProperty.foreach(child => unregisterSubtree(child, form))
-      case _ => ()
-    }
-  }
 }

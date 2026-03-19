@@ -1,11 +1,13 @@
 package app
 
 import jfx.action.Button
-import jfx.core.state.Property
+import jfx.core.state.{ListProperty, Property}
 import jfx.form.{Form, Input}
 import jfx.layout.Div
-import jfx.statement.Conditional
+import jfx.statement.{Conditional, ForEach}
 import org.scalajs.dom
+
+import scala.scalajs.js
 
 object Main {
 
@@ -14,6 +16,8 @@ object Main {
     val person = Person(Property("John"), Property("Doe"))
 
     val opening = new Property(true)
+
+    val list = ListProperty(js.Array(1,2,3))
 
     val div = new Div()
 
@@ -45,6 +49,12 @@ object Main {
 
     toggle.addClick(_ => opening.set(!opening.get))
 
+    container.addChild(new ForEach[Int](list, (elem, index) => {
+      val div2 = new Div()
+      div2.textContent = elem.toString
+      div2
+    }))
+    
     dom.document.body.appendChild(div.element)
 
   }
