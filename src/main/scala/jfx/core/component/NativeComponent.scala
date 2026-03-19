@@ -5,6 +5,8 @@ import jfx.core.state.ListProperty.*
 import jfx.form.{Control, Formular}
 import org.scalajs.dom.{Element, HTMLElement, Node}
 
+import scala.scalajs.js
+
 trait NativeComponent[E <: Node] extends ChildrenComponent[E] {
 
   private val childrenObserver = childrenProperty.observeChanges(onChildrenChange)
@@ -17,10 +19,10 @@ trait NativeComponent[E <: Node] extends ChildrenComponent[E] {
       case _ => findParentFormOption()
     }
 
-  private def registerSubtree(component: Component[? <: Node]): Unit =
+  private def registerSubtree(component: NodeComponent[? <: Node]): Unit =
     enclosingFormOption().foreach(form => registerSubtree(component, form))
 
-  private def registerSubtree(component: Component[? <: Node], form: Formular): Unit = {
+  private def registerSubtree(component: NodeComponent[? <: Node], form: Formular): Unit = {
     component match {
       case control: Control[?,?] => form.addControl(control)
       case _ => ()
@@ -33,10 +35,10 @@ trait NativeComponent[E <: Node] extends ChildrenComponent[E] {
     }
   }
 
-  private def unregisterSubtree(component: Component[? <: Node]): Unit =
+  private def unregisterSubtree(component: NodeComponent[? <: Node]): Unit =
     enclosingFormOption().foreach(form => unregisterSubtree(component, form))
 
-  private def unregisterSubtree(component: Component[? <: Node], form: Formular): Unit = {
+  private def unregisterSubtree(component: NodeComponent[? <: Node], form: Formular): Unit = {
     component match {
       case control: Control[?,?] => form.removeControl(control)
       case _ => ()
@@ -49,7 +51,7 @@ trait NativeComponent[E <: Node] extends ChildrenComponent[E] {
     }
   }
 
-  private def onChildrenChange(change: ListProperty.Change[Component[? <: Node]]): Unit =
+  private def onChildrenChange(change: ListProperty.Change[NodeComponent[? <: Node]]): Unit =
     change match {
       case Reset(_) =>
         removeAllDomChildren()
@@ -134,7 +136,7 @@ trait NativeComponent[E <: Node] extends ChildrenComponent[E] {
     else element.insertBefore(childElement, ref)
   }
 
-  private def insertAllDomAt(index: Int, childElements: scala.scalajs.js.Array[Node]): Unit = {
+  private def insertAllDomAt(index: Int, childElements: js.Array[Node]): Unit = {
     val ref = referenceNodeAt(index)
     if (ref == null) {
       childElements.foreach { child =>

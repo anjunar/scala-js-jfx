@@ -1,6 +1,6 @@
 package jfx.form
 
-import jfx.core.component.{ChildrenComponent, Component, NativeComponent}
+import jfx.core.component.{ChildrenComponent, Component, NativeComponent, NodeComponent}
 import jfx.core.state.{ListProperty, Property}
 import jfx.core.state.ListProperty.*
 import org.scalajs.dom.{HTMLElement, HTMLFormElement, Node}
@@ -54,9 +54,9 @@ class Form[M <: Model[M]](model : M) extends NativeComponent[HTMLFormElement], F
     }
   }
 
-  private def isInThisForm(component: Component[? <: Node]): Boolean = {
+  private def isInThisForm(component: NodeComponent[? <: Node]): Boolean = {
     @annotation.tailrec
-    def loop(current: Option[Component[? <: Node]]): Boolean =
+    def loop(current: Option[NodeComponent[? <: Node]]): Boolean =
       current match {
         case None => false
         case Some(parentComponent) if parentComponent.eq(this) => true

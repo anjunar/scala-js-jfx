@@ -12,19 +12,14 @@ object Main {
   def main(args: Array[String]): Unit = {
 
     val person = Person(Property("John"), Property("Doe"))
-    
+
     val opening = new Property(true)
 
     val div = new Div()
 
-    val removeButton = new Button()
-    removeButton.textContent = "Remove Input"
-    removeButton.buttonType = "button"
-
-    val addButton = new Button()
-    addButton.textContent = "Add Input"
-    addButton.buttonType = "button"
-
+    val toggle = new Button()
+    toggle.textContent = "Toggle"
+    toggle.buttonType = "button"
 
     val form = new Form(person)
     val container = new Div()
@@ -34,14 +29,21 @@ object Main {
     val firstNameInput = new Input("firstName")
     val lastNameInput = new Input("lastName")
 
-    container.addChild(firstNameInput)
-    container.addChild(lastNameInput)
-    container.addChild(removeButton)
-    container.addChild(addButton)
+    container.addChild(toggle)
 
     div.addChild(form)
-    
-    container.addChild(new Conditional(opening))
+
+    val conditional = new Conditional(opening)
+    conditional.thenAdd(firstNameInput)
+    conditional.thenAdd(lastNameInput)
+
+    val div1 = new Div()
+    div1.textContent = "Hello"
+    conditional.elseAdd(div1)
+
+    container.addChild(conditional)
+
+    toggle.addClick(_ => opening.set(!opening.get))
 
     dom.document.body.appendChild(div.element)
 

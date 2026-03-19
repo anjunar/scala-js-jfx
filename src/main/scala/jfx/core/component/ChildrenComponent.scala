@@ -6,8 +6,8 @@ import org.scalajs.dom.{HTMLElement, Node, console}
 
 trait ChildrenComponent[E <: Node] extends Component[E] {
 
-  val childrenProperty: ListProperty[Component[? <: Node]] =
-    new ListProperty[Component[? <: Node]]()
+  val childrenProperty: ListProperty[NodeComponent[? <: Node]] =
+    new ListProperty[NodeComponent[? <: Node]]()
 
   override def dispose(): Unit = {
     val children = childrenProperty.toList
@@ -16,7 +16,7 @@ trait ChildrenComponent[E <: Node] extends Component[E] {
     disposable.dispose()
   }
 
-  def addChild(child: Component[? <: Node]): Unit = {
+  def addChild(child: NodeComponent[? <: Node]): Unit = {
     if (childrenProperty.contains(child)) {
       console.warn("Child already in list")
       return
@@ -24,10 +24,10 @@ trait ChildrenComponent[E <: Node] extends Component[E] {
     childrenProperty += child
   }
 
-  def removeChild(child: Component[? <: Node]): Unit =
+  def removeChild(child: NodeComponent[? <: Node]): Unit =
     childrenProperty -= child
 
-  def insertChild(index: Int, child: Component[? <: Node]): Unit =
+  def insertChild(index: Int, child: NodeComponent[? <: Node]): Unit =
     if (childrenProperty.contains(child)) {
       console.warn("Child already in list")
       return
