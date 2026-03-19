@@ -1,6 +1,7 @@
 package jfx.form
 
 import jfx.core.component.NativeComponent
+import jfx.core.component.FormRegistrationBoundary
 import jfx.core.state.{Disposable, ListProperty, Property}
 import jfx.core.state.ListProperty.*
 import org.scalajs.dom.HTMLFieldSetElement
@@ -10,6 +11,7 @@ import scala.scalajs.js
 
 class ArrayForm[V <: Model[V]](val name: String)
     extends NativeComponent[HTMLFieldSetElement],
+      FormRegistrationBoundary,
       Control[js.Array[V], HTMLFieldSetElement] {
 
   override lazy val element: HTMLFieldSetElement = newElement("fieldset")

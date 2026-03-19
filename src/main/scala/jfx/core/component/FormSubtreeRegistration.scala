@@ -1,16 +1,13 @@
 package jfx.core.component
 
-import jfx.form.{ArrayForm, Control, Formular, Model}
-import org.scalajs.dom.{HTMLFieldSetElement, Node}
+import jfx.form.{Control, Formular}
+import org.scalajs.dom.Node
 
 trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
 
   protected def enclosingFormOption(): Option[Formular[?,?]] =
     this match {
-      case arrayForm : ArrayForm[?] => Some(new Formular[?, HTMLFieldSetElement] {
-        override val name: String = arrayForm.name
-        override lazy val element: HTMLFieldSetElement = arrayForm.element
-      })
+      case _: FormRegistrationBoundary => None
       case form: Formular[?,?] => Some(form)
       case _ => findParentFormOption()
     }
@@ -27,10 +24,19 @@ trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
       case _ => ()
     }
 
-    component match {
-      case children: ChildrenComponent[?] =>
-        children.childrenProperty.foreach(child => registerSubtree(child, form))
-      case _ => ()
+    val recurse =
+      component match {
+        case _: FormRegistrationBoundary => false
+        case _: Formular[?, ?] => false
+        case _ => true
+      }
+
+    if (recurse) {
+      component match {
+        case children: ChildrenComponent[?] =>
+          children.childrenProperty.foreach(child => registerSubtree(child, form))
+        case _ => ()
+      }
     }
   }
 
@@ -40,10 +46,19 @@ trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
       case _ => ()
     }
 
-    component match {
-      case children: ChildrenComponent[?] =>
-        children.childrenProperty.foreach(child => unregisterSubtree(child, form))
-      case _ => ()
+    val recurse =
+      component match {
+        case _: FormRegistrationBoundary => false
+        case _: Formular[?, ?] => false
+        case _ => true
+      }
+
+    if (recurse) {
+      component match {
+        case children: ChildrenComponent[?] =>
+          children.childrenProperty.foreach(child => unregisterSubtree(child, form))
+        case _ => ()
+      }
     }
   }
 }
