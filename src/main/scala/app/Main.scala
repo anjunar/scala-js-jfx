@@ -1,6 +1,8 @@
 package app
 
 import jfx.action.Button
+import jfx.control.cell.PropertyValueFactory
+import jfx.control.{TableColumn, TableView}
 import jfx.core.state.{ListProperty, Property}
 import jfx.form.{ArrayForm, Form, Input, SubForm}
 import jfx.json.{JsonMapper, JsonRegistry}
@@ -87,6 +89,26 @@ object Main {
       div2.textContent = elem.toString
       div2
     }))
+
+    val persons = ListProperty(js.Array(person))
+
+    val table = new TableView[Person]()
+    table.setItems(persons)
+    table.setFixedCellSize(32)
+
+    val firstName = new TableColumn[Person, String]("First Name")
+    firstName.setCellValueFactory(new PropertyValueFactory[Person, String]("firstName"))
+    firstName.setPrefWidth(180)
+
+    val lastName = new TableColumn[Person, String]("Last Name")
+    lastName.setCellValueFactory(new PropertyValueFactory[Person, String]("lastName"))
+    lastName.setPrefWidth(180)
+
+
+    table.getColumns.addOne(firstName)
+    table.getColumns.addOne(lastName)
+
+    div.addChild(table)
 
     dom.document.body.appendChild(div.element)
 
