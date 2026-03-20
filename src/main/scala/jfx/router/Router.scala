@@ -2,6 +2,7 @@ package jfx.router
 
 import jfx.core.component.NodeComponent
 import jfx.core.state.Property
+import jfx.dsl.Scope
 import jfx.statement.DynamicOutlet
 import org.scalajs.dom.{Comment, Event, Node, console, window}
 
@@ -10,7 +11,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
 import scala.util.{Failure, Success}
 
-class Router(val routes: js.Array[Route]) extends NodeComponent[Comment] {
+class Router(val routes: js.Array[Route], private val scope: Scope) extends NodeComponent[Comment] {
 
   private final case class ParsedLocation(
     pathname: String,
@@ -139,7 +140,7 @@ class Router(val routes: js.Array[Route]) extends NodeComponent[Comment] {
     )
 
     try {
-      val renderPromise = routeMatch.route.factory(context)
+      val renderPromise = routeMatch.route.factory(context, scope)
       renderPromise
         .toFuture
         .onComplete {
@@ -273,6 +274,6 @@ class Router(val routes: js.Array[Route]) extends NodeComponent[Comment] {
 }
 
 object Router {
-  def apply(routes: js.Array[Route]): Router =
-    new Router(routes)
+  def apply(routes: js.Array[Route])(using scope: Scope): Router =
+    new Router(routes, scope)
 }

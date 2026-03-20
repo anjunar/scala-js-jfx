@@ -9,23 +9,23 @@ object Routes {
 
   val routes = js.Array[Route](
 
-    Route(
+    Route.scoped(
       path = "/",
-      factory = _ =>
-        js.Promise.resolve(
-          div {
-            text = "Hallo Welt!"
-          }
-        ),
+      factory = {
+        val greeting = js.Promise.resolve("Hallo Welt!").await
+        div {
+          text = greeting
+        }
+      },
       children = js.Array(
-        Route(
+        Route.scoped(
           path = "/person",
-          factory = context =>
-            js.Promise.resolve(
-              div {
-                text = s"Person ${context.queryParams.get("id").getOrElse("")}".trim
-              }
-            )
+          factory = {
+            val context = routeContext
+            div {
+              text = s"Person ${context.queryParams.get("id").getOrElse("")}".trim
+            }
+          }
         )
       )
     )

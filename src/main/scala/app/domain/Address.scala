@@ -1,4 +1,4 @@
-package app
+package app.domain
 
 import jfx.core.macros.property
 import jfx.core.state.{Property, PropertyAccess}

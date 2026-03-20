@@ -1,0 +1,6 @@
+button {
+    border: none;
+    background-color: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+}

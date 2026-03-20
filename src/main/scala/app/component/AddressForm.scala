@@ -1,5 +1,6 @@
-package app
+package app.component
 
+import app.domain.Address
 import jfx.core.component.CompositeComponent
 import jfx.dsl.*
 import org.scalajs.dom.HTMLDivElement

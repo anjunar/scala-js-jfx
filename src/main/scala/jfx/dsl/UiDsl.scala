@@ -5,8 +5,8 @@ import jfx.core.component.{ChildrenComponent, CompositeComponent, ElementCompone
 import jfx.core.state.{Disposable, ListProperty, ReadOnlyProperty}
 import jfx.control.{TableCell, TableColumn, TableRow, TableView, TableViewSelectionModel}
 import jfx.form.{Form, Formular, Input, Model, SubForm}
-import jfx.layout.{Div, HBox, VBox}
-import jfx.router.{Route, Router}
+import jfx.layout.{Div, Drawer, HBox, VBox}
+import jfx.router.{Route, RouteContext, Router}
 import jfx.statement.{Conditional, DynamicOutlet, ForEach}
 import org.scalajs.dom.{Event, Node}
 
@@ -87,6 +87,15 @@ inline def vbox(init: VBox ?=> Unit): VBox =
     attach(component, currentContext)
     component
   }
+
+inline def drawer(init: Drawer ?=> Unit = {}): Drawer =
+  composite(new Drawer(init))
+
+def drawerNavigation(init: => Unit)(using drawer: Drawer): Unit =
+  drawer.navigation(init)
+
+def drawerContent(init: => Unit)(using drawer: Drawer): Unit =
+  drawer.content(init)
 
 
 inline def form[M <: Model[M]](model: M)(init: Form[M] ?=> Unit): Form[M] =
@@ -231,13 +240,21 @@ inline def composite[C <: CompositeComponent[? <: Node]](component: C): C =
     component
   }
 
+def mount[C <: NodeComponent[? <: Node]](component: C): C =
+  currentScope { _ =>
+    val currentContext = currentComponentContext()
+    attach(component, currentContext)
+    component
+  }
+
 inline def router(routes: js.Array[Route]): Router =
   router(routes)({})
 
 inline def router(routes: js.Array[Route])(init: Router ?=> Unit): Router =
   currentScope { currentScope =>
     val currentContext = currentComponentContext()
-    val component = new Router(routes)
+    given Scope = currentScope
+    val component = Router(routes)
     withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
       given Scope = currentScope
       given Router = component
@@ -367,6 +384,33 @@ def buttonType(using button: Button): String =
 def buttonType_=(value: String)(using button: Button): Unit =
   button.buttonType = value
 
+def drawerOpen(using drawer: Drawer): Boolean =
+  drawer.isOpen
+
+def drawerOpen_=(value: Boolean)(using drawer: Drawer): Unit =
+  drawer.isOpen = value
+
+def drawerWidth(using drawer: Drawer): String =
+  drawer.width
+
+def drawerWidth_=(value: String)(using drawer: Drawer): Unit =
+  drawer.width = value
+
+def closeOnScrimClick(using drawer: Drawer): Boolean =
+  drawer.closeOnScrimClick
+
+def closeOnScrimClick_=(value: Boolean)(using drawer: Drawer): Unit =
+  drawer.closeOnScrimClick = value
+
+def openDrawer(using drawer: Drawer): Unit =
+  drawer.open()
+
+def closeDrawer(using drawer: Drawer): Unit =
+  drawer.close()
+
+def toggleDrawer(using drawer: Drawer): Unit =
+  drawer.toggle()
+
 def onClick(listener: Event => Unit)(using button: Button): Disposable =
   button.addClick(listener)
 
@@ -466,6 +510,9 @@ def cellSelected(using tableCell: TableCell[?, ?]): Boolean =
 
 def rowPlaceholder(using tableRow: TableRow[?]): Boolean =
   tableRow.isPlaceholder
+
+def routeContext(using context: RouteContext): RouteContext =
+  context
 
 def routerContent(using router: Router): ReadOnlyProperty[NodeComponent[? <: Node] | Null] =
   router.contentProperty

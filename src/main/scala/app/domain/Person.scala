@@ -1,4 +1,4 @@
-package app
+package app.domain
 
 import jfx.core.macros.property
 import jfx.core.state.{ListProperty, Property, PropertyAccess}
@@ -12,6 +12,7 @@ class Person(var firstName: Property[String] = new Property[String](""),
              var emails: ListProperty[Email] = new ListProperty[Email]()) extends Model[Person] {
   override def properties: js.Array[PropertyAccess[Person, ?]] = Person.properties
 }
+
 
 object Person {
 

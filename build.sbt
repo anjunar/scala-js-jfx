@@ -1,3 +1,5 @@
+import org.scalajs.linker.interface.ESVersion
+
 enablePlugins(ScalaJSPlugin)
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
@@ -10,6 +12,8 @@ lazy val root = (project in file("."))
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1",
     libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13),
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.ESModule))
+    scalaJSLinkerConfig ~= (
+      _.withModuleKind(ModuleKind.ESModule)
+        .withESFeatures(_.withESVersion(ESVersion.ES2017))
+    )
   )
-
