@@ -144,6 +144,8 @@ class ListProperty[V](val underlying: js.Array[V] = js.Array[V]()) extends ReadO
       value
     }
   }
+
+  def remotePropertyOrNull: RemoteListProperty[V, ?] | Null = null
 }
 
 object ListProperty {
@@ -393,6 +395,8 @@ class RemoteListProperty[V, Query](
   val hasMoreProperty: Property[Boolean] = Property(false)
   val totalCountProperty: Property[Option[Int]] = Property(None)
   val nextQueryProperty: Property[Option[Query]] = Property(None)
+
+  override def remotePropertyOrNull: RemoteListProperty[V, Query] = this
 
   def query: Query = queryProperty.get
 

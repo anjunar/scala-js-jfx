@@ -59,8 +59,11 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
 
   def itemsProperty: Property[ListProperty[S]] = itemsRefProperty
   def getItems: ListProperty[S] = itemsRefProperty.get
-  def setItems(items: ListProperty[S]): Unit =
-    itemsRefProperty.set(if (items == null) new ListProperty[S]() else items)
+  def setItems(items: ListProperty[S]): Unit = {
+    val normalizedItems = if (items == null) new ListProperty[S]() else items
+    if (itemsRefProperty.get.eq(normalizedItems)) return
+    itemsRefProperty.setAlways(normalizedItems)
+  }
 
   def items: ListProperty[S] = getItems
   def items_=(items: ListProperty[S]): Unit = setItems(items)
@@ -625,12 +628,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
     columnsProperty.iterator.map(_.asInstanceOf[TableColumn[S, Any]]).toVector
 
   private def currentRemoteItems: RemoteListProperty[S, ?] | Null =
-    getItems match {
-      case remote: RemoteListProperty[?, ?] =>
-        remote.asInstanceOf[RemoteListProperty[S, ?]]
-      case _ =>
-        null
-    }
+    getItems.remotePropertyOrNull
 
   private def currentContentWidth: Double = {
     val viewportWidth = math.max(viewport.clientWidth.toDouble, 0.0)

@@ -11,6 +11,10 @@ class Property[T](var value: T) extends ReadOnlyProperty[T] {
 
   def set(newValue: T) : Unit = {
     if (newValue == value) return
+    setAlways(newValue)
+  }
+
+  def setAlways(newValue: T): Unit = {
     value = newValue
     listeners.toList.foreach { it => it(newValue) }
   }
