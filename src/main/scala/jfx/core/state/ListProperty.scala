@@ -155,9 +155,10 @@ object ListProperty {
     loader: RemoteLoader[V, Query],
     initialQuery: Query,
     underlying: js.Array[V] = js.Array[V](),
-    executionContext: ExecutionContext = ExecutionContext.global
+    executionContext: ExecutionContext = ExecutionContext.global,
+    sortUpdater: Option[(Query, Seq[RemoteSort]) => Query] = None
   ): RemoteListProperty[V, Query] =
-    new RemoteListProperty[V, Query](loader, initialQuery, underlying, executionContext)
+    new RemoteListProperty[V, Query](loader, initialQuery, underlying, executionContext, sortUpdater)
 
   def subscribeBidirectional[V](a: ListProperty[V], b: ListProperty[V]): Disposable = {
     if (a.eq(b)) return () => ()
@@ -254,6 +255,11 @@ object ListProperty {
     totalCount: Option[Int] = None,
     hasMore: Option[Boolean] = None
   )
+
+  final case class RemoteSort(field: String, ascending: Boolean = true) {
+    def direction: String = if (ascending) "asc" else "desc"
+    def asQueryValue: String = s"$field,$direction"
+  }
 
   object RemotePage {
 
@@ -374,12 +380,14 @@ class RemoteListProperty[V, Query](
   val loader: ListProperty.RemoteLoader[V, Query],
   initialQuery: Query,
   underlying: js.Array[V] = js.Array[V](),
-  executionContext: ExecutionContext = ExecutionContext.global
+  executionContext: ExecutionContext = ExecutionContext.global,
+  sortUpdater: Option[(Query, Seq[ListProperty.RemoteSort]) => Query] = None
 ) extends ListProperty[V](underlying) {
 
   private given ExecutionContext = executionContext
 
   val queryProperty: Property[Query] = Property(initialQuery)
+  val sortingProperty: Property[Vector[ListProperty.RemoteSort]] = Property(Vector.empty)
   val loadingProperty: Property[Boolean] = Property(false)
   val errorProperty: Property[Option[Throwable]] = Property(None)
   val hasMoreProperty: Property[Boolean] = Property(false)
@@ -390,6 +398,20 @@ class RemoteListProperty[V, Query](
 
   def query_=(value: Query): Unit =
     queryProperty.set(value)
+
+  def supportsSorting: Boolean = sortUpdater.nonEmpty
+
+  def getSorting: Vector[ListProperty.RemoteSort] = sortingProperty.get
+
+  def applySorting(sorting: Seq[ListProperty.RemoteSort]): js.Promise[js.Array[V]] =
+    sortUpdater match {
+      case Some(updateSorting) =>
+        val normalizedSorting = sorting.toVector
+        sortingProperty.set(normalizedSorting)
+        reload(updateSorting(queryProperty.get, normalizedSorting))
+      case None =>
+        js.Promise.reject(IllegalStateException("This RemoteListProperty does not support remote sorting"))
+    }
 
   def reload(): js.Promise[js.Array[V]] =
     load(queryProperty.get, append = false)

@@ -1,12 +1,16 @@
 package jfx.control
 
 import jfx.core.component.{ElementComponent, FormSubtreeRegistration, NodeComponent}
-import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property}
+import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, RemoteListProperty}
 import org.scalajs.dom.{Event, HTMLDivElement, Node, window}
 
+import scala.concurrent.ExecutionContext
 import scala.scalajs.js
+import scala.scalajs.js.JSConverters.*
 
 class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistration {
+
+  private given ExecutionContext = ExecutionContext.global
 
   private val headerViewport: HTMLDivElement = newElement("div")
   private val headerContent: HTMLDivElement = newElement("div")
@@ -27,6 +31,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
   private var disposed = false
   private var scheduledRefresh = false
   private var itemsObserver: Disposable = TableView.noopDisposable
+  private var remoteItemsObserver: Disposable = TableView.noopDisposable
   private var columnObserver: Disposable = TableView.noopDisposable
   private var rowPool: Vector[TableRow[S]] = Vector.empty
   private var mountedPlaceholder: NodeComponent[? <: Node] | Null = null
@@ -92,6 +97,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
     disposed = true
 
     itemsObserver.dispose()
+    remoteItemsObserver.dispose()
     columnObserver.dispose()
     detachMountedPlaceholder()
     hideDefaultPlaceholder()
@@ -177,6 +183,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
 
     val itemsRefObserver = itemsRefProperty.observe { _ =>
       rewireItemsObserver()
+      rebuildHeader()
       scheduleRefresh()
     }
     disposable.add(itemsRefObserver)
@@ -215,8 +222,34 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
 
   private def rewireItemsObserver(): Unit = {
     itemsObserver.dispose()
-    itemsObserver = getItems.observeChanges { _ =>
+    remoteItemsObserver.dispose()
+
+    val items = getItems
+    itemsObserver = items.observeChanges { _ =>
       scheduleRefresh()
+    }
+
+    currentRemoteItems match {
+      case null =>
+        remoteItemsObserver = TableView.noopDisposable
+      case remote =>
+        val composite = new CompositeDisposable()
+        composite.add(remote.loadingProperty.observe { _ =>
+          refreshPlaceholder()
+          scheduleRefresh()
+        })
+        composite.add(remote.errorProperty.observe { _ =>
+          refreshPlaceholder()
+        })
+        composite.add(remote.sortingProperty.observe { _ =>
+          rebuildHeader()
+          scheduleRefresh()
+        })
+        remoteItemsObserver = composite
+
+        if (remote.length == 0 && !remote.loadingProperty.get && remote.errorProperty.get.isEmpty) {
+          discardPromise(remote.reload())
+        }
     }
   }
 
@@ -275,6 +308,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
     ensureRowPool(requiredRows, columns)
 
     val firstVisibleIndex = math.floor(viewport.scrollTop / rowHeight).toInt
+    val visibleEndExclusive = math.min(itemCount, firstVisibleIndex + baseVisibleCount)
     val startIndex =
       if (requiredRows >= itemCount) 0
       else math.max(0, math.min(itemCount - requiredRows, firstVisibleIndex - TableView.overscanRows))
@@ -294,6 +328,8 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
         row.clear(rowHeight, rowWidth)
       }
     }
+
+    requestLazyLoadIfNecessary(itemCount, visibleEndExclusive)
   }
 
   private def ensureRowPool(requiredRows: Int, columns: Seq[TableColumn[S, Any]]): Unit = {
@@ -344,7 +380,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
     currentColumns.zipWithIndex.foreach { case (column, index) =>
       val cell = newElement("div")
       cell.className = "jfx-table-header-cell"
-      cell.textContent = column.getText
+      cell.textContent = headerText(column)
       cell.style.display = "flex"
       cell.style.setProperty("align-items", "center")
       cell.style.boxSizing = "border-box"
@@ -361,6 +397,13 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
       cell.style.width = widthValue
       cell.style.minWidth = widthValue
       cell.style.maxWidth = widthValue
+      if (isRemoteSortable(column)) {
+        cell.style.cursor = "pointer"
+        cell.onclick = _ => toggleRemoteSort(column)
+      } else {
+        cell.style.cursor = "default"
+        cell.onclick = null
+      }
       headerContent.appendChild(cell)
     }
   }
@@ -389,6 +432,8 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
   }
 
   private def refreshPlaceholder(): Unit = {
+    updateDefaultPlaceholderText()
+
     val showPlaceholder = getItems.isEmpty
     placeholderLayer.style.display = if (showPlaceholder) "flex" else "none"
 
@@ -442,6 +487,86 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
     if (defaultPlaceholder.parentNode == placeholderLayer) {
       placeholderLayer.removeChild(defaultPlaceholder)
     }
+  }
+
+  private def requestLazyLoadIfNecessary(itemCount: Int, visibleEndExclusive: Int): Unit = {
+    val remote = currentRemoteItems
+    if (remote == null) return
+    if (remote.loadingProperty.get) return
+    if (!remote.hasMoreProperty.get) return
+    if (remote.errorProperty.get.nonEmpty) return
+
+    val remainingItems = math.max(0, itemCount - visibleEndExclusive)
+    if (remainingItems <= TableView.lazyLoadThresholdRows) {
+      discardPromise(remote.loadMore())
+    }
+  }
+
+  private def updateDefaultPlaceholderText(): Unit = {
+    val text =
+      currentRemoteItems match {
+        case null =>
+          "No content in table"
+        case remote if remote.loadingProperty.get =>
+          "Loading table data..."
+        case remote =>
+          remote.errorProperty.get
+            .flatMap(error => Option(error.getMessage))
+            .filter(_.nonEmpty)
+            .getOrElse("No content in table")
+      }
+
+    defaultPlaceholder.textContent = text
+  }
+
+  private def headerText(column: TableColumn[S, Any]): String =
+    currentSortFor(column) match {
+      case Some(sort) =>
+        s"${column.getText} ${if (sort.ascending) TableView.ascendingIndicator else TableView.descendingIndicator}"
+      case None =>
+        column.getText
+    }
+
+  private def toggleRemoteSort(column: TableColumn[S, Any]): Unit = {
+    val remote = currentRemoteItems
+    val sortKey = sortKeyOf(column)
+
+    if (remote == null || !remote.supportsSorting || sortKey.isEmpty) return
+
+    val nextSorting =
+      currentSortFor(column) match {
+        case Some(sort) if sort.ascending =>
+          Vector(ListProperty.RemoteSort(sort.field, ascending = false))
+        case Some(_) =>
+          Vector.empty
+        case None =>
+          Vector(ListProperty.RemoteSort(sortKey.get, ascending = true))
+      }
+
+    discardPromise(remote.applySorting(nextSorting))
+  }
+
+  private def currentSortFor(column: TableColumn[S, Any]): Option[ListProperty.RemoteSort] = {
+    val sortKey = sortKeyOf(column)
+    if (sortKey.isEmpty) None
+    else currentRemoteSorting.find(_.field == sortKey.get)
+  }
+
+  private def isRemoteSortable(column: TableColumn[S, Any]): Boolean =
+    column.isSortable && sortKeyOf(column).nonEmpty && currentRemoteItems != null && currentRemoteItems.supportsSorting
+
+  private def sortKeyOf(column: TableColumn[S, Any]): Option[String] =
+    Option(column.getSortKey).map(_.trim).filter(_.nonEmpty)
+
+  private def currentRemoteSorting: Vector[ListProperty.RemoteSort] =
+    currentRemoteItems match {
+      case null   => Vector.empty
+      case remote => remote.getSorting
+    }
+
+  private def discardPromise(promise: js.Promise[?]): Unit = {
+    promise.toFuture.recover { case _ => () }
+    ()
   }
 
   private def syncHeaderScroll(): Unit = {
@@ -499,6 +624,14 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
   private def currentColumns: Vector[TableColumn[S, Any]] =
     columnsProperty.iterator.map(_.asInstanceOf[TableColumn[S, Any]]).toVector
 
+  private def currentRemoteItems: RemoteListProperty[S, ?] | Null =
+    getItems match {
+      case remote: RemoteListProperty[?, ?] =>
+        remote.asInstanceOf[RemoteListProperty[S, ?]]
+      case _ =>
+        null
+    }
+
   private def currentContentWidth: Double = {
     val viewportWidth = math.max(viewport.clientWidth.toDouble, 0.0)
     math.max(currentColumns.foldLeft(0.0)(_ + _.effectiveWidth), viewportWidth)
@@ -521,6 +654,9 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
 
 object TableView {
   private[control] val overscanRows = 6
+  private[control] val lazyLoadThresholdRows = 3
+  private[control] val ascendingIndicator = "\u2191"
+  private[control] val descendingIndicator = "\u2193"
   private[control] val noopDisposable: Disposable = () => ()
 }
 

@@ -9,6 +9,7 @@ class TableColumn[S, T](initialText: String = "") {
   val minWidthProperty: Property[Double] = Property(40.0)
   val maxWidthProperty: Property[Double] = Property(Double.PositiveInfinity)
   val sortableProperty: Property[Boolean] = Property(false)
+  val sortKeyProperty: Property[String | Null] = Property(null)
   val resizableProperty: Property[Boolean] = Property(true)
   val cellValueFactoryProperty: Property[TableColumn.CellDataFeatures[S, T] => ReadOnlyProperty[T] | Null] =
     Property(null)
@@ -33,6 +34,15 @@ class TableColumn[S, T](initialText: String = "") {
 
   def isSortable: Boolean = sortableProperty.get
   def setSortable(value: Boolean): Unit = sortableProperty.set(value)
+  def getSortKey: String | Null = sortKeyProperty.get
+  def setSortKey(value: String | Null): Unit =
+    sortKeyProperty.set(
+      if (value == null) null
+      else {
+        val trimmed = value.trim
+        if (trimmed.isEmpty) null else trimmed
+      }
+    )
 
   def isResizable: Boolean = resizableProperty.get
   def setResizable(value: Boolean): Unit = resizableProperty.set(value)
@@ -83,6 +93,7 @@ class TableColumn[S, T](initialText: String = "") {
     composite.add(observeWithoutInitial(minWidthProperty)(_ => listener()))
     composite.add(observeWithoutInitial(maxWidthProperty)(_ => listener()))
     composite.add(observeWithoutInitial(sortableProperty)(_ => listener()))
+    composite.add(observeWithoutInitial(sortKeyProperty)(_ => listener()))
     composite.add(observeWithoutInitial(resizableProperty)(_ => listener()))
     composite.add(observeWithoutInitial(cellValueFactoryProperty)(_ => listener()))
     composite.add(observeWithoutInitial(cellFactoryProperty)(_ => listener()))
