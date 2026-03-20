@@ -21,6 +21,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
       lastColumn: Boolean
     ): Unit = {
       valueObserver.dispose()
+      cell.setLoadingPlaceholder(false)
       cell.setColumnWidth(column.effectiveWidth, lastColumn)
       cell.applyContext(tableView, row, column, rowIndex, selected)
       val observableValue = column.resolveCellValue(tableView, rowValue, rowIndex)
@@ -35,6 +36,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
     def clear(): Unit = {
       valueObserver.dispose()
       valueObserver = TableRow.noopDisposable
+      cell.setLoadingPlaceholder(false)
       cell.applyContext(null, null, column, -1, selected = false)
       cell.applyRenderedItem(null, empty = true)
     }
@@ -47,6 +49,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
     ): Unit = {
       valueObserver.dispose()
       valueObserver = TableRow.noopDisposable
+      cell.setLoadingPlaceholder(true)
       cell.setColumnWidth(column.effectiveWidth, lastColumn)
       cell.applyContext(tableView, row, column, rowIndex, selected = false)
       cell.applyRenderedItem(null, empty = true)
@@ -61,6 +64,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
   val itemProperty: Property[S | Null] = Property(null)
   val emptyProperty: Property[Boolean] = Property(true)
   val selectedProperty: Property[Boolean] = Property(false)
+  val placeholderProperty: Property[Boolean] = Property(false)
   val indexProperty: Property[Int] = Property(-1)
   val tableViewProperty: Property[TableView[S] | Null] = Property(null)
 
@@ -88,6 +92,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
   def getIndex: Int = indexProperty.get
   def isEmpty: Boolean = emptyProperty.get
   def isSelected: Boolean = selectedProperty.get
+  def isPlaceholder: Boolean = placeholderProperty.get
   def getTableView: TableView[S] | Null = tableViewProperty.get
 
   protected def updateItem(item: S | Null, empty: Boolean): Unit = ()
@@ -95,6 +100,10 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
   protected def updateSelected(selected: Boolean): Unit = {
     element.style.backgroundColor =
       if (selected) "#dbeafe"
+      else if (placeholderProperty.get) {
+        if (math.abs(indexProperty.get) % 2 == 0) "#ffffff"
+        else "#f8fafc"
+      }
       else if (emptyProperty.get) "transparent"
       else if (math.abs(indexProperty.get) % 2 == 0) "#ffffff"
       else "#f8fafc"
@@ -134,6 +143,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
     itemProperty.set(rowValue)
     emptyProperty.set(false)
     selectedProperty.set(selected)
+    placeholderProperty.set(false)
 
     updateItem(rowValue, empty = false)
     updateSelected(selected)
@@ -160,6 +170,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
     itemProperty.set(null)
     emptyProperty.set(true)
     selectedProperty.set(false)
+    placeholderProperty.set(false)
 
     updateItem(null, empty = true)
     updateSelected(selected = false)
@@ -186,6 +197,7 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
     itemProperty.set(null)
     emptyProperty.set(true)
     selectedProperty.set(false)
+    placeholderProperty.set(true)
 
     updateItem(null, empty = true)
     updateSelected(selected = false)

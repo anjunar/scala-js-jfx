@@ -5,6 +5,7 @@ import jfx.core.state.Property
 import org.scalajs.dom.HTMLDivElement
 
 class TableCell[S, T] extends NativeComponent[HTMLDivElement] {
+  private var loadingPlaceholder = false
 
   val itemProperty: Property[T | Null] = Property(null)
   val emptyProperty: Property[Boolean] = Property(true)
@@ -17,16 +18,6 @@ class TableCell[S, T] extends NativeComponent[HTMLDivElement] {
   override lazy val element: HTMLDivElement = {
     val div = newElement("div")
     div.className = "jfx-table-cell"
-    div.style.boxSizing = "border-box"
-    div.style.display = "flex"
-    div.style.setProperty("align-items", "center")
-    div.style.padding = "0 10px"
-    div.style.overflow = "hidden"
-    div.style.whiteSpace = "nowrap"
-    div.style.textOverflow = "ellipsis"
-    div.style.borderBottom = "1px solid #e5e7eb"
-    div.style.borderRight = "1px solid #e5e7eb"
-    div.style.backgroundColor = "inherit"
     div
   }
 
@@ -38,10 +29,27 @@ class TableCell[S, T] extends NativeComponent[HTMLDivElement] {
   def getTableRow: TableRow[S] | Null = tableRowProperty.get
   def getTableColumn: TableColumn[S, T] | Null = tableColumnProperty.get
 
-  protected def updateItem(item: T | Null, empty: Boolean): Unit =
+  protected def updateItem(item: T | Null, empty: Boolean): Unit = {
     textContent = if (empty || item == null) "" else item.toString
+    updatePlaceholderAppearance()
+  }
 
   protected def updateSelected(selected: Boolean): Unit = ()
+
+  private def updatePlaceholderAppearance(): Unit =
+    if (loadingPlaceholder) {
+      element.classList.add("jfx-table-cell-loading-placeholder")
+      element.style.setProperty("--jfx-table-cell-placeholder-width", s"${placeholderWidthPercent}%")
+    } else {
+      element.classList.remove("jfx-table-cell-loading-placeholder")
+      element.style.removeProperty("--jfx-table-cell-placeholder-width")
+    }
+
+  private def placeholderWidthPercent: Int = {
+    val columnHash = Option(getTableColumn).map(_.getText.hashCode).getOrElse(0)
+    val variant = math.abs(getIndex + columnHash) % 4
+    38 + variant * 12
+  }
 
   private[control] def applyContext(
     tableView: TableView[S] | Null,
@@ -64,6 +72,15 @@ class TableCell[S, T] extends NativeComponent[HTMLDivElement] {
     updateItem(item, empty)
   }
 
+  private[control] def setLoadingPlaceholder(active: Boolean): Unit = {
+    if (loadingPlaceholder == active) return
+    loadingPlaceholder = active
+    if (active) {
+      textContent = ""
+    }
+    updatePlaceholderAppearance()
+  }
+
   private[control] def setColumnWidth(width: Double, lastColumn: Boolean): Unit = {
     val boundedWidth = math.max(0.0, width)
     val widthValue = s"${boundedWidth}px"
@@ -71,6 +88,7 @@ class TableCell[S, T] extends NativeComponent[HTMLDivElement] {
     element.style.width = widthValue
     element.style.minWidth = widthValue
     element.style.maxWidth = widthValue
-    element.style.borderRight = if (lastColumn) "none" else "1px solid #e5e7eb"
+    if (lastColumn) element.classList.add("jfx-table-cell-last")
+    else element.classList.remove("jfx-table-cell-last")
   }
 }

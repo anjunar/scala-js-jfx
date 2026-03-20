@@ -11,7 +11,7 @@ import org.scalajs.dom.HTMLInputElement
 import scala.concurrent.{ExecutionContext, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
-import scala.scalajs.js.timers.setTimeout
+import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 import scala.util.control.NonFatal
 
 object Main {
@@ -46,7 +46,7 @@ object Main {
 
     val description = new Div()
     description.textContent =
-      "Use the filter, click the column headers for server sorting, and scroll near the bottom to lazy load more rows."
+      "Type into the filter for debounced server reloads, click the column headers for server sorting, and scroll into unloaded areas to fetch rows on demand."
     styleDescription(description)
 
     val toolbar = new Div()
@@ -101,9 +101,53 @@ object Main {
     table.setFixedCellSize(34)
     table.element.style.height = "360px"
 
+    val filterDebounceMs = 280
+    var pendingFilterHandle: Option[SetTimeoutHandle] = None
+    var queuedFilterReload: Option[String] = None
+
+    def currentFilterValue: String =
+      filterInput.value.trim
+
+    def cancelPendingFilterReload(): Unit = {
+      pendingFilterHandle.foreach(clearTimeout)
+      pendingFilterHandle = None
+    }
+
+    def shouldReloadFilter(filter: String): Boolean = {
+      val currentQuery = remotePersons.query
+      currentQuery.filter != filter ||
+      currentQuery.offset != 0 ||
+      remotePersons.errorProperty.get.nonEmpty
+    }
+
+    def runFilterReload(filter: String): Unit = {
+      queuedFilterReload = None
+      if (shouldReloadFilter(filter)) {
+        discard(remotePersons.reload(current => current.copy(filter = filter, offset = 0)))
+      } else {
+        updateStatus()
+      }
+    }
+
+    def requestFilterReload(filter: String): Unit =
+      if (remotePersons.loadingProperty.get) {
+        queuedFilterReload = Some(filter)
+      } else {
+        runFilterReload(filter)
+      }
+
+    def scheduleFilterReload(): Unit = {
+      val filter = currentFilterValue
+      cancelPendingFilterReload()
+      pendingFilterHandle = Some(setTimeout(filterDebounceMs) {
+        pendingFilterHandle = None
+        requestFilterReload(filter)
+      })
+    }
+
     def applyFilter(): Unit = {
-      val filter = filterInput.value.trim
-      discard(remotePersons.reload(current => current.copy(filter = filter, offset = 0)))
+      cancelPendingFilterReload()
+      requestFilterReload(currentFilterValue)
     }
 
     def updateStatus(): Unit = {
@@ -125,18 +169,37 @@ object Main {
 
     applyFilterButton.addClick(_ => applyFilter())
     clearFilterButton.addClick(_ => {
+      cancelPendingFilterReload()
+      queuedFilterReload = None
       filterInput.value = ""
-      discard(remotePersons.reload(current => current.copy(filter = "", offset = 0)))
+      requestFilterReload("")
     })
-    reloadButton.addClick(_ => discard(remotePersons.reload()))
+    reloadButton.addClick(_ => {
+      cancelPendingFilterReload()
+      queuedFilterReload = None
+      discard(remotePersons.reload())
+    })
+
+    filterInput.oninput = _ => scheduleFilterReload()
 
     filterInput.onkeydown = event =>
       if (event.key == "Enter") {
+        event.preventDefault()
         applyFilter()
       }
 
     remotePersons.observe(_ => updateStatus())
-    remotePersons.loadingProperty.observe(_ => updateStatus())
+    remotePersons.loadingProperty.observe { loading =>
+      updateStatus()
+      if (!loading) {
+        queuedFilterReload.foreach { filter =>
+          queuedFilterReload = None
+          setTimeout(0) {
+            requestFilterReload(filter)
+          }
+        }
+      }
+    }
     remotePersons.errorProperty.observe(_ => updateStatus())
     remotePersons.totalCountProperty.observe(_ => updateStatus())
     remotePersons.sortingProperty.observe(_ => updateStatus())

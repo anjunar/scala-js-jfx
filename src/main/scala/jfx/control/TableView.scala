@@ -39,17 +39,6 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
   override lazy val element: HTMLDivElement = {
     val div = newElement("div")
     div.className = "jfx-table-view"
-    div.style.display = "flex"
-    div.style.setProperty("flex-direction", "column")
-    div.style.position = "relative"
-    div.style.overflow = "hidden"
-    div.style.boxSizing = "border-box"
-    div.style.border = "1px solid #cbd5e1"
-    div.style.borderRadius = "6px"
-    div.style.backgroundColor = "#ffffff"
-    div.style.minWidth = "0"
-    div.style.minHeight = "0"
-    div.style.height = "400px"
     div
   }
 
@@ -111,50 +100,16 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
 
   private def initializeStructure(): Unit = {
     headerViewport.className = "jfx-table-header-viewport"
-    headerViewport.style.position = "relative"
-    headerViewport.style.overflow = "hidden"
-    headerViewport.style.setProperty("flex", "0 0 auto")
-    headerViewport.style.borderBottom = "1px solid #cbd5e1"
-    headerViewport.style.backgroundColor = "#f8fafc"
 
     headerContent.className = "jfx-table-header-content"
-    headerContent.style.display = "flex"
-    headerContent.style.position = "relative"
-    headerContent.style.left = "0"
-    headerContent.style.top = "0"
-    headerContent.style.minHeight = "100%"
 
     bodyWrapper.className = "jfx-table-body-wrapper"
-    bodyWrapper.style.position = "relative"
-    bodyWrapper.style.setProperty("flex", "1 1 auto")
-    bodyWrapper.style.minHeight = "0"
-    bodyWrapper.style.minWidth = "0"
-    bodyWrapper.style.overflow = "hidden"
-    bodyWrapper.style.backgroundColor = "#ffffff"
 
     viewport.className = "jfx-table-viewport"
-    viewport.style.position = "relative"
-    viewport.style.height = "100%"
-    viewport.style.width = "100%"
-    viewport.style.overflow = "auto"
-    viewport.style.minHeight = "0"
-    viewport.style.minWidth = "0"
-    viewport.style.backgroundColor = "#ffffff"
 
     content.className = "jfx-table-content"
-    content.style.position = "relative"
-    content.style.minHeight = "100%"
-    content.style.backgroundColor = "#ffffff"
 
     placeholderLayer.className = "jfx-table-placeholder"
-    placeholderLayer.style.position = "absolute"
-    placeholderLayer.style.setProperty("inset", "0")
-    placeholderLayer.style.display = "none"
-    placeholderLayer.style.setProperty("align-items", "center")
-    placeholderLayer.style.setProperty("justify-content", "center")
-    placeholderLayer.style.padding = "16px"
-    placeholderLayer.style.boxSizing = "border-box"
-    placeholderLayer.style.backgroundColor = "rgba(255,255,255,0.92)"
 
     headerViewport.appendChild(headerContent)
     viewport.appendChild(content)
@@ -167,9 +122,6 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
   private def initializeDefaultPlaceholder(): Unit = {
     defaultPlaceholder.className = "jfx-table-default-placeholder"
     defaultPlaceholder.textContent = "No content in table"
-    defaultPlaceholder.style.color = "#64748b"
-    defaultPlaceholder.style.fontSize = "14px"
-    defaultPlaceholder.style.textAlign = "center"
   }
 
   private def initializeObservers(): Unit = {
@@ -415,27 +367,17 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
       val cell = newElement("div")
       cell.className = "jfx-table-header-cell"
       cell.textContent = headerText(column)
-      cell.style.display = "flex"
-      cell.style.setProperty("align-items", "center")
-      cell.style.boxSizing = "border-box"
-      cell.style.padding = "0 10px"
-      cell.style.fontWeight = "600"
-      cell.style.fontSize = "13px"
-      cell.style.color = "#1e293b"
-      cell.style.whiteSpace = "nowrap"
-      cell.style.overflow = "hidden"
-      cell.style.textOverflow = "ellipsis"
-      cell.style.borderRight = if (index == currentColumns.length - 1) "none" else "1px solid #cbd5e1"
+      if (index == currentColumns.length - 1) cell.classList.add("jfx-table-header-cell-last")
       val widthValue = s"${column.effectiveWidth}px"
       cell.style.setProperty("flex", s"0 0 $widthValue")
       cell.style.width = widthValue
       cell.style.minWidth = widthValue
       cell.style.maxWidth = widthValue
       if (isRemoteSortable(column)) {
-        cell.style.cursor = "pointer"
+        cell.classList.add("jfx-table-header-cell-sortable")
         cell.onclick = _ => toggleRemoteSort(column)
       } else {
-        cell.style.cursor = "default"
+        cell.classList.remove("jfx-table-header-cell-sortable")
         cell.onclick = null
       }
       headerContent.appendChild(cell)
