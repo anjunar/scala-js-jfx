@@ -86,7 +86,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
 
   def scrollTo(index: Int): Unit = {
     if (disposed) return
-    val itemCount = getItems.length
+    val itemCount = getItems.totalLength
     if (itemCount == 0) return
     val clamped = math.max(0, math.min(itemCount - 1, index))
     viewport.scrollTop = clamped * effectiveRowHeight
@@ -276,8 +276,8 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
     val columns = currentColumns
     val rowHeight = effectiveRowHeight
     val headerHeight = effectiveHeaderHeight(rowHeight)
-    val itemCount = getItems.length
-    val contentWidth = updateLayoutMetrics(columns, rowHeight, headerHeight, itemCount)
+    val totalItemCount = getItems.totalLength
+    val contentWidth = updateLayoutMetrics(columns, rowHeight, headerHeight, totalItemCount)
 
     refreshPlaceholder()
     refreshVisibleRows(columns = columns, rowHeight = rowHeight, rowWidth = contentWidth)
@@ -299,29 +299,38 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
     if (disposed) return
 
     val items = getItems
-    val itemCount = items.length
-    if (itemCount == 0) {
+    val loadedItemCount = items.length
+    val totalItemCount = items.totalLength
+    if (totalItemCount == 0) {
       ensureRowPool(0, columns)
       return
     }
 
     val viewportHeight = math.max(viewport.clientHeight.toDouble, 0.0)
     val baseVisibleCount = math.max(1, math.ceil(viewportHeight / rowHeight).toInt)
-    val requiredRows = math.min(itemCount, baseVisibleCount + TableView.overscanRows * 2)
+    val requiredRows = math.min(totalItemCount, baseVisibleCount + TableView.overscanRows * 2)
     ensureRowPool(requiredRows, columns)
 
     val firstVisibleIndex = math.floor(viewport.scrollTop / rowHeight).toInt
-    val visibleEndExclusive = math.min(itemCount, firstVisibleIndex + baseVisibleCount)
+    val visibleEndExclusive = math.min(totalItemCount, firstVisibleIndex + baseVisibleCount)
     val startIndex =
-      if (requiredRows >= itemCount) 0
-      else math.max(0, math.min(itemCount - requiredRows, firstVisibleIndex - TableView.overscanRows))
+      if (requiredRows >= totalItemCount) 0
+      else math.max(0, math.min(totalItemCount - requiredRows, firstVisibleIndex - TableView.overscanRows))
 
     rowPool.zipWithIndex.foreach { case (row, poolIndex) =>
       val rowIndex = startIndex + poolIndex
-      if (rowIndex < itemCount) {
+      if (rowIndex < loadedItemCount) {
         row.bind(
           rowIndex = rowIndex,
           rowValue = items(rowIndex),
+          tableView = this,
+          columns = columns,
+          rowHeight = rowHeight,
+          rowWidth = rowWidth
+        )
+      } else if (rowIndex < totalItemCount) {
+        row.showPlaceholder(
+          rowIndex = rowIndex,
           tableView = this,
           columns = columns,
           rowHeight = rowHeight,
@@ -332,7 +341,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
       }
     }
 
-    requestLazyLoadIfNecessary(itemCount, visibleEndExclusive)
+    requestLazyLoadIfNecessary(loadedItemCount, visibleEndExclusive)
   }
 
   private def ensureRowPool(requiredRows: Int, columns: Seq[TableColumn[S, Any]]): Unit = {

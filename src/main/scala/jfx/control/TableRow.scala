@@ -39,6 +39,19 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
       cell.applyRenderedItem(null, empty = true)
     }
 
+    def showPlaceholder(
+      tableView: TableView[S],
+      row: TableRow[S],
+      rowIndex: Int,
+      lastColumn: Boolean
+    ): Unit = {
+      valueObserver.dispose()
+      valueObserver = TableRow.noopDisposable
+      cell.setColumnWidth(column.effectiveWidth, lastColumn)
+      cell.applyContext(tableView, row, column, rowIndex, selected = false)
+      cell.applyRenderedItem(null, empty = true)
+    }
+
     def disposeBinding(): Unit = {
       valueObserver.dispose()
       valueObserver = TableRow.noopDisposable
@@ -152,6 +165,39 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
     updateSelected(selected = false)
 
     cellSlots.foreach(_.clear())
+  }
+
+  private[control] def showPlaceholder(
+    rowIndex: Int,
+    tableView: TableView[S],
+    columns: Seq[TableColumn[S, ?]],
+    rowHeight: Double,
+    rowWidth: Double
+  ): Unit = {
+    if (cellSlots.length != columns.length) rebuildCells(columns)
+
+    element.style.display = "flex"
+    element.style.top = s"${rowIndex * rowHeight}px"
+    element.style.height = s"${rowHeight}px"
+    element.style.width = s"${math.max(0.0, rowWidth)}px"
+
+    tableViewProperty.set(tableView)
+    indexProperty.set(rowIndex)
+    itemProperty.set(null)
+    emptyProperty.set(true)
+    selectedProperty.set(false)
+
+    updateItem(null, empty = true)
+    updateSelected(selected = false)
+
+    cellSlots.zipWithIndex.foreach { case (slot, index) =>
+      slot.showPlaceholder(
+        tableView = tableView,
+        row = this,
+        rowIndex = rowIndex,
+        lastColumn = index == cellSlots.length - 1
+      )
+    }
   }
 
   override def dispose(): Unit = {

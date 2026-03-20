@@ -134,6 +134,8 @@ class ListProperty[V](val underlying: js.Array[V] = js.Array[V]()) extends ReadO
 
   override def length: Int = underlying.length
 
+  def totalLength: Int = length
+
   override def iterator: Iterator[V] = new Iterator[V] {
     private var i = 0
     override def hasNext: Boolean = i < underlying.length
@@ -406,6 +408,8 @@ class RemoteListProperty[V, Query](
   def supportsSorting: Boolean = sortUpdater.nonEmpty
 
   def getSorting: Vector[ListProperty.RemoteSort] = sortingProperty.get
+
+  override def totalLength: Int = totalCountProperty.get.getOrElse(length)
 
   def applySorting(sorting: Seq[ListProperty.RemoteSort]): js.Promise[js.Array[V]] =
     sortUpdater match {
