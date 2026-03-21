@@ -6,6 +6,7 @@ import jfx.core.state.Property
 import jfx.domain.Media
 import org.scalajs.dom.{Event, HTMLDivElement, HTMLElement, MouseEvent, Node, PointerEvent, window as browserWindow}
 
+import scala.scalajs.js
 import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
 import scala.util.control.NonFatal
 
@@ -71,7 +72,7 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
   addDisposable(() => stopActivePointerInteraction(persistState = false))
   addDisposable(() => openAnimationHandle.foreach(clearTimeout))
 
-  private val clickListener: Event => Unit = _ => clickHandler.foreach(_(this))
+  private val clickListener: js.Function1[Event, Unit] = _ => clickHandler.foreach(_(this))
   element.addEventListener("click", clickListener)
   addDisposable(() => element.removeEventListener("click", clickListener))
 
@@ -298,7 +299,7 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
   }
 
   private def configureHeaderDrag(): Unit = {
-    val pointerDownListener: Event => Unit = {
+    val pointerDownListener: js.Function1[Event, Unit] = {
       case event: PointerEvent if shouldStartDrag(event) =>
         startDrag(event, headerHost.element)
       case _ =>
@@ -332,7 +333,7 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
       handle.classProperty ++= Seq("jfx-window__handle", s"jfx-window__handle--$name")
       addChild(handle)
 
-      val pointerDownListener: Event => Unit = {
+      val pointerDownListener: js.Function1[Event, Unit] = {
         case event: PointerEvent if isPrimaryPointerButton(event) =>
           startResize(event, handle.element, horizontal = horizontal, vertical = vertical)
         case _ =>
@@ -423,7 +424,7 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
 
     activePointerId = startEvent.pointerId
 
-    val moveListener: Event => Unit = {
+    val moveListener: js.Function1[Event, Unit] = {
       case event: PointerEvent if event.pointerId == startEvent.pointerId =>
         if (pointerButtonsReleased(event)) {
           stopActivePointerInteraction(persistState = true)
@@ -434,19 +435,19 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
       case _ => ()
     }
 
-    val finishListener: Event => Unit = {
+    val finishListener: js.Function1[Event, Unit] = {
       case event: PointerEvent if event.pointerId == startEvent.pointerId =>
         stopActivePointerInteraction(persistState = true)
       case _ =>
         ()
     }
 
-    val blurListener: Event => Unit = _ => stopActivePointerInteraction(persistState = true)
-    val mouseUpFallback: Event => Unit = {
+    val blurListener: js.Function1[Event, Unit] = _ => stopActivePointerInteraction(persistState = true)
+    val mouseUpFallback: js.Function1[Event, Unit] = {
       case _: MouseEvent => stopActivePointerInteraction(persistState = true)
       case _             => ()
     }
-    val nextPointerDownListener: Event => Unit = {
+    val nextPointerDownListener: js.Function1[Event, Unit] = {
       case event: PointerEvent if event.pointerId == startEvent.pointerId && event.target != startEvent.target =>
         stopActivePointerInteraction(persistState = true)
       case event: PointerEvent if activePointerId == startEvent.pointerId && event.pointerId != startEvent.pointerId =>
@@ -460,6 +461,8 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
     browserWindow.addEventListener("pointercancel", finishListener)
     browserWindow.addEventListener("pointerdown", nextPointerDownListener)
     browserWindow.addEventListener("mouseup", mouseUpFallback)
+    captureTarget.addEventListener("pointerup", finishListener)
+    captureTarget.addEventListener("pointercancel", finishListener)
     captureTarget.addEventListener("lostpointercapture", finishListener)
     browserWindow.addEventListener("blur", blurListener)
 
@@ -476,6 +479,8 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
       browserWindow.removeEventListener("pointercancel", finishListener)
       browserWindow.removeEventListener("pointerdown", nextPointerDownListener)
       browserWindow.removeEventListener("mouseup", mouseUpFallback)
+      captureTarget.removeEventListener("pointerup", finishListener)
+      captureTarget.removeEventListener("pointercancel", finishListener)
       captureTarget.removeEventListener("lostpointercapture", finishListener)
       browserWindow.removeEventListener("blur", blurListener)
 
