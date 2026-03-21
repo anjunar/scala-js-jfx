@@ -27,7 +27,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
   val placeholderProperty: Property[NodeComponent[? <: Node] | Null] = Property(null)
   val rowFactoryProperty: Property[TableView[S] => TableRow[S]] = Property(_ => new TableRow[S]())
 
-  private val selectionModel = new TableViewSelectionModel(this)
+  private val selectionModel = new TableView.SelectionModel(this)
 
   private var disposed = false
   private var scheduledRefresh = false
@@ -70,7 +70,7 @@ class TableView[S] extends ElementComponent[HTMLDivElement], FormSubtreeRegistra
   def setRowFactory(factory: TableView[S] => TableRow[S]): Unit =
     rowFactoryProperty.set(if (factory == null) (_ => new TableRow[S]()) else factory)
 
-  def getSelectionModel: TableViewSelectionModel[S] = selectionModel
+  def getSelectionModel: TableView.SelectionModel[S] = selectionModel
 
   def refresh(): Unit = refreshNow()
 
@@ -693,7 +693,7 @@ object TableView {
   def rowFactory_=[S](factory: TableView[S] => TableRow[S])(using tableView: TableView[S]): Unit =
     tableView.setRowFactory(factory)
 
-  def selectionModel[S](using tableView: TableView[S]): TableViewSelectionModel[S] =
+  def selectionModel[S](using tableView: TableView[S]): SelectionModel[S] =
     tableView.getSelectionModel
 
   def refresh(using tableView: TableView[?]): Unit =
@@ -707,55 +707,57 @@ object TableView {
 
   def placeholder_=(value: NodeComponent[? <: Node] | Null)(using tableView: TableView[?]): Unit =
     tableView.setPlaceholder(value)
-}
 
-class TableViewSelectionModel[S](tableView: TableView[S]) extends Disposable {
+  class SelectionModel[S](tableView: TableView[S]) extends Disposable {
 
-  val selectedIndexProperty: Property[Int] = Property(-1)
-  val selectedItemProperty: Property[S | Null] = Property(null)
+    val selectedIndexProperty: Property[Int] = Property(-1)
+    val selectedItemProperty: Property[S | Null] = Property(null)
 
-  private var itemsObserver: Disposable = TableView.noopDisposable
+    private var itemsObserver: Disposable = TableView.noopDisposable
 
-  private val itemsRefObserver = tableView.itemsProperty.observe { items =>
-    itemsObserver.dispose()
-    itemsObserver = items.observeChanges { _ =>
+    private val itemsRefObserver = tableView.itemsProperty.observe { items =>
+      itemsObserver.dispose()
+      itemsObserver = items.observeChanges { _ =>
+        reconcile()
+      }
       reconcile()
     }
-    reconcile()
-  }
 
-  def getSelectedIndex: Int = selectedIndexProperty.get
-  def getSelectedItem: S | Null = selectedItemProperty.get
+    def getSelectedIndex: Int = selectedIndexProperty.get
 
-  def clearSelection(): Unit = {
-    selectedIndexProperty.set(-1)
-    selectedItemProperty.set(null)
-  }
+    def getSelectedItem: S | Null = selectedItemProperty.get
 
-  def select(index: Int): Unit = {
-    val items = tableView.getItems
-    if (index < 0 || index >= items.length) clearSelection()
-    else {
-      selectedIndexProperty.set(index)
-      selectedItemProperty.set(items(index))
+    def clearSelection(): Unit = {
+      selectedIndexProperty.set(-1)
+      selectedItemProperty.set(null)
+    }
+
+    def select(index: Int): Unit = {
+      val items = tableView.getItems
+      if (index < 0 || index >= items.length) clearSelection()
+      else {
+        selectedIndexProperty.set(index)
+        selectedItemProperty.set(items(index))
+      }
+    }
+
+    def select(item: S): Unit = {
+      val index = tableView.getItems.indexOf(item)
+      if (index < 0) clearSelection()
+      else select(index)
+    }
+
+    private def reconcile(): Unit = {
+      val items = tableView.getItems
+      val index = selectedIndexProperty.get
+      if (index < 0 || index >= items.length) clearSelection()
+      else selectedItemProperty.set(items(index))
+    }
+
+    override def dispose(): Unit = {
+      itemsObserver.dispose()
+      itemsRefObserver.dispose()
     }
   }
 
-  def select(item: S): Unit = {
-    val index = tableView.getItems.indexOf(item)
-    if (index < 0) clearSelection()
-    else select(index)
-  }
-
-  private def reconcile(): Unit = {
-    val items = tableView.getItems
-    val index = selectedIndexProperty.get
-    if (index < 0 || index >= items.length) clearSelection()
-    else selectedItemProperty.set(items(index))
-  }
-
-  override def dispose(): Unit = {
-    itemsObserver.dispose()
-    itemsRefObserver.dispose()
-  }
 }

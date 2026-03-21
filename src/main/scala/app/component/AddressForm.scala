@@ -37,5 +37,7 @@ final class AddressForm(slot: AddressForm ?=> Unit = ()) extends CompositeCompon
 
 }
 
-def addressForm(init: AddressForm ?=> Unit = {}): AddressForm =
-  composite(new AddressForm(init))
+object AddressForm {
+  def addressForm(init: AddressForm ?=> Unit = {}): AddressForm =
+    composite(new AddressForm(init))
+}

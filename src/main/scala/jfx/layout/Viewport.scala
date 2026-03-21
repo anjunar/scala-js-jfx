@@ -14,9 +14,6 @@ import scala.scalajs.js.timers.setTimeout
 
 final class Viewport(slot: Viewport ?=> Unit = {}) extends CompositeComponent[HTMLDivElement] {
 
-  private var activeDslContext: CompositeComponent.DslContext | Null = null
-  private var structureInitialized = false
-
   override lazy val element: HTMLDivElement = {
     val divElement = newElement("div")
     divElement.classList.add("jfx-viewport")
@@ -26,40 +23,21 @@ final class Viewport(slot: Viewport ?=> Unit = {}) extends CompositeComponent[HT
   override protected def compose(using CompositeComponent.DslContext): Unit =
     withDslContext {
       given Viewport = this
-      activeDslContext = summon[CompositeComponent.DslContext]
 
-      try {
-        slot
+      slot
 
-        forEach(Viewport.windows) { conf =>
-          buildWindow(conf, dslContext)
-        }
+      forEach(Viewport.windows) { conf =>
+        buildWindow(conf, dslContext)
+      }
 
-        forEach(Viewport.overlays) { conf =>
-          composite(new ViewportOverlay(conf))
-        }
+      forEach(Viewport.overlays) { conf =>
+        composite(new Viewport.Overlay(conf))
+      }
 
-        forEach(Viewport.notifications) { conf =>
-          new ViewportNotification(conf)
-        }
-      } finally {
-        activeDslContext = null
+      forEach(Viewport.notifications) { conf =>
+        new Viewport.Notification(conf)
       }
     }
-
-  private def withSection(host: Div)(init: => Unit): Unit = {
-    val context = activeDslContext
-    if (context == null) {
-      throw IllegalStateException("Viewport sections can only be declared while the viewport is composing")
-    }
-
-    DslRuntime.withCompositeContext(host, context) {
-      given CompositeComponent.DslContext = context
-      given Scope = context.scope
-      given Div = host
-      init
-    }
-  }
 
   private def buildWindow(
     conf: Viewport.WindowConf,
@@ -245,151 +223,152 @@ object Viewport {
   def closeWindowById(id: String): Unit =
     windows.find(_.id == id).foreach(windows -= _)
 
-}
+  private final class Overlay(conf: Viewport.OverlayConf) extends CompositeComponent[HTMLDivElement] {
 
-private final class ViewportOverlay(conf: Viewport.OverlayConf) extends CompositeComponent[HTMLDivElement] {
+    private val stopClickListener: Event => Unit = _.stopPropagation()
 
-  private val stopClickListener: Event => Unit = _.stopPropagation()
+    override lazy val element: HTMLDivElement = {
+      val divElement = newElement("div")
+      divElement.classList.add("jfx-viewport-overlay")
+      divElement.style.zIndex = conf.zIndex.toString
+      divElement
+    }
 
-  override lazy val element: HTMLDivElement = {
-    val divElement = newElement("div")
-    divElement.classList.add("jfx-viewport-overlay")
-    divElement.style.zIndex = conf.zIndex.toString
-    divElement
-  }
+    element.addEventListener("click", stopClickListener)
+    addDisposable(() => element.removeEventListener("click", stopClickListener))
 
-  element.addEventListener("click", stopClickListener)
-  addDisposable(() => element.removeEventListener("click", stopClickListener))
-
-  addDisposable(
-    followAnchorFixed(
-      overlayElement = element,
-      anchorElement = conf.anchor,
-      offsetXPx = conf.offsetXPx,
-      offsetYPx = conf.offsetYPx,
-      widthPx = conf.widthPx,
-      minWidthPx = conf.minWidthPx,
-      maxHeightPx = conf.maxHeightPx,
-      marginViewportPx = conf.marginViewportPx,
-      flipY = conf.flipY
+    addDisposable(
+      followAnchorFixed(
+        overlayElement = element,
+        anchorElement = conf.anchor,
+        offsetXPx = conf.offsetXPx,
+        offsetYPx = conf.offsetYPx,
+        widthPx = conf.widthPx,
+        minWidthPx = conf.minWidthPx,
+        maxHeightPx = conf.maxHeightPx,
+        marginViewportPx = conf.marginViewportPx,
+        flipY = conf.flipY
+      )
     )
-  )
 
-  override protected def compose(using CompositeComponent.DslContext): Unit =
-    withDslContext {
-      given Scope = dslContext.scope
-      conf.content
-    }
-}
+    override protected def compose(using CompositeComponent.DslContext): Unit =
+      withDslContext {
+        given Scope = dslContext.scope
 
-private final class ViewportNotification(conf: Viewport.NotificationConf) extends NativeComponent[HTMLDivElement] {
-
-  override lazy val element: HTMLDivElement = {
-    val divElement = newElement("div")
-    divElement.classList.add("jfx-viewport-notification")
-    divElement.classList.add(s"jfx-viewport-notification--${conf.kind.cssClass}")
-    divElement.textContent = conf.message
-    divElement
+        conf.content
+      }
   }
 
-  addDisposable(conf.visible.observe(syncVisibleState))
+  private final class Notification(conf: Viewport.NotificationConf) extends NativeComponent[HTMLDivElement] {
 
-  private val clickListener: Event => Unit = _ => Viewport.closeNotification(conf)
-  element.addEventListener("click", clickListener)
-  addDisposable(() => element.removeEventListener("click", clickListener))
-
-  private def syncVisibleState(visible: Boolean): Unit =
-    if (visible) {
-      element.classList.remove("is-hidden")
-    } else {
-      element.classList.add("is-hidden")
+    override lazy val element: HTMLDivElement = {
+      val divElement = newElement("div")
+      divElement.classList.add("jfx-viewport-notification")
+      divElement.classList.add(s"jfx-viewport-notification--${conf.kind.cssClass}")
+      divElement.textContent = conf.message
+      divElement
     }
-}
 
-private def followAnchorFixed(
-  overlayElement: HTMLElement,
-  anchorElement: HTMLElement,
-  offsetXPx: Double,
-  offsetYPx: Double,
-  widthPx: Option[Double],
-  minWidthPx: Option[Double],
-  maxHeightPx: Option[Double],
-  marginViewportPx: Double,
-  flipY: Boolean
-): Disposable = {
-  var disposed = false
-  var rafId: Option[Int] = None
+    addDisposable(conf.visible.observe(syncVisibleState))
 
-  def applyPosition(): Unit = {
-    if (disposed) return
+    private val clickListener: Event => Unit = _ => Viewport.closeNotification(conf)
+    element.addEventListener("click", clickListener)
+    addDisposable(() => element.removeEventListener("click", clickListener))
 
-    val anchorRect = anchorElement.getBoundingClientRect()
-    val viewportWidth = window.innerWidth.toDouble
-    val viewportHeight = window.innerHeight.toDouble
-
-    val resolvedWidth = widthPx.getOrElse(anchorRect.width)
-
-    val desiredLeft = anchorRect.left + offsetXPx
-    val minLeft = marginViewportPx
-    val maxLeft = viewportWidth - resolvedWidth - marginViewportPx
-    val left =
-      if (maxLeft <= minLeft) minLeft
-      else desiredLeft.max(minLeft).min(maxLeft)
-
-    val measuredOverlayHeight =
-      Option.when(overlayElement.offsetHeight > 0)(overlayElement.offsetHeight.toDouble).getOrElse(0.0)
-
-    val belowTop = anchorRect.bottom + offsetYPx
-    val aboveTop = anchorRect.top - measuredOverlayHeight - offsetYPx
-
-    val preferredTop =
-      if (flipY && measuredOverlayHeight > 0) {
-        val spaceBelow = viewportHeight - belowTop - marginViewportPx
-        val spaceAbove = anchorRect.top - marginViewportPx
-
-        if (spaceBelow < measuredOverlayHeight && spaceAbove > spaceBelow) aboveTop else belowTop
+    private def syncVisibleState(visible: Boolean): Unit =
+      if (visible) {
+        element.classList.remove("is-hidden")
       } else {
-        belowTop
+        element.classList.add("is-hidden")
+      }
+  }
+
+  private def followAnchorFixed(
+                                 overlayElement: HTMLElement,
+                                 anchorElement: HTMLElement,
+                                 offsetXPx: Double,
+                                 offsetYPx: Double,
+                                 widthPx: Option[Double],
+                                 minWidthPx: Option[Double],
+                                 maxHeightPx: Option[Double],
+                                 marginViewportPx: Double,
+                                 flipY: Boolean
+                               ): Disposable = {
+    var disposed = false
+    var rafId: Option[Int] = None
+
+    def applyPosition(): Unit = {
+      if (disposed) return
+
+      val anchorRect = anchorElement.getBoundingClientRect()
+      val viewportWidth = window.innerWidth.toDouble
+      val viewportHeight = window.innerHeight.toDouble
+
+      val resolvedWidth = widthPx.getOrElse(anchorRect.width)
+
+      val desiredLeft = anchorRect.left + offsetXPx
+      val minLeft = marginViewportPx
+      val maxLeft = viewportWidth - resolvedWidth - marginViewportPx
+      val left =
+        if (maxLeft <= minLeft) minLeft
+        else desiredLeft.max(minLeft).min(maxLeft)
+
+      val measuredOverlayHeight =
+        Option.when(overlayElement.offsetHeight > 0)(overlayElement.offsetHeight.toDouble).getOrElse(0.0)
+
+      val belowTop = anchorRect.bottom + offsetYPx
+      val aboveTop = anchorRect.top - measuredOverlayHeight - offsetYPx
+
+      val preferredTop =
+        if (flipY && measuredOverlayHeight > 0) {
+          val spaceBelow = viewportHeight - belowTop - marginViewportPx
+          val spaceAbove = anchorRect.top - marginViewportPx
+
+          if (spaceBelow < measuredOverlayHeight && spaceAbove > spaceBelow) aboveTop else belowTop
+        } else {
+          belowTop
+        }
+
+      val minTop = marginViewportPx
+      val maxTop = viewportHeight - marginViewportPx
+      val top =
+        if (maxTop <= minTop) minTop
+        else preferredTop.max(minTop).min(maxTop)
+
+      overlayElement.style.left = s"${left}px"
+      overlayElement.style.top = s"${top}px"
+
+      widthPx match {
+        case Some(width) =>
+          overlayElement.style.width = s"${width}px"
+          overlayElement.style.removeProperty("min-width")
+        case None =>
+          overlayElement.style.removeProperty("width")
+          overlayElement.style.minWidth = s"${resolvedWidth}px"
       }
 
-    val minTop = marginViewportPx
-    val maxTop = viewportHeight - marginViewportPx
-    val top =
-      if (maxTop <= minTop) minTop
-      else preferredTop.max(minTop).min(maxTop)
+      minWidthPx match {
+        case Some(width) => overlayElement.style.minWidth = s"${width}px"
+        case None if widthPx.nonEmpty =>
+          ()
+        case None =>
+          ()
+      }
 
-    overlayElement.style.left = s"${left}px"
-    overlayElement.style.top = s"${top}px"
+      maxHeightPx match {
+        case Some(height) => overlayElement.style.maxHeight = s"${height}px"
+        case None => overlayElement.style.removeProperty("max-height")
+      }
 
-    widthPx match {
-      case Some(width) =>
-        overlayElement.style.width = s"${width}px"
-        overlayElement.style.removeProperty("min-width")
-      case None =>
-        overlayElement.style.removeProperty("width")
-        overlayElement.style.minWidth = s"${resolvedWidth}px"
-    }
-
-    minWidthPx match {
-      case Some(width) => overlayElement.style.minWidth = s"${width}px"
-      case None if widthPx.nonEmpty =>
-        ()
-      case None =>
-        ()
-    }
-
-    maxHeightPx match {
-      case Some(height) => overlayElement.style.maxHeight = s"${height}px"
-      case None         => overlayElement.style.removeProperty("max-height")
+      rafId = Some(window.requestAnimationFrame(_ => applyPosition()))
     }
 
     rafId = Some(window.requestAnimationFrame(_ => applyPosition()))
+
+    () => {
+      disposed = true
+      rafId.foreach(window.cancelAnimationFrame)
+    }
   }
 
-  rafId = Some(window.requestAnimationFrame(_ => applyPosition()))
-
-  () => {
-    disposed = true
-    rafId.foreach(window.cancelAnimationFrame)
-  }
 }

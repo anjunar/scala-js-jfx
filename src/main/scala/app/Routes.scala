@@ -1,6 +1,7 @@
 package app
 
-import app.pages.{formPage, tablePage}
+import app.pages.FormPage.formPage
+import app.pages.TablePage.tablePage
 import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
 import jfx.layout.Div.div

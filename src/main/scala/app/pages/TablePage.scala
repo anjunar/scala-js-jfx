@@ -449,5 +449,7 @@ class TablePage extends CompositeComponent[HTMLDivElement] {
   }
 }
 
-def tablePage(init: TablePage ?=> Unit = {}): TablePage =
-  composite(new TablePage())
+object TablePage {
+  def tablePage(init: TablePage ?=> Unit = {}): TablePage =
+    composite(new TablePage())
+}

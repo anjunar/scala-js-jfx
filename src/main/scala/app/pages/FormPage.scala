@@ -1,6 +1,6 @@
 package app.pages
 
-import app.component.addressForm
+import app.component.AddressForm.addressForm
 import app.domain.{Address, Email, Person}
 import jfx.core.component.CompositeComponent
 import jfx.core.component.ElementComponent.*
@@ -129,5 +129,8 @@ class FormPage extends CompositeComponent[HTMLDivElement] {
   }
 }
 
-def formPage(init: FormPage ?=> Unit = {}): FormPage =
-  composite(new FormPage())
+object FormPage {
+  def formPage(init: FormPage ?=> Unit = {}): FormPage =
+    composite(new FormPage())
+}
+
