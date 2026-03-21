@@ -9,7 +9,7 @@ trait ManagedElementComponent[E <: Node]
 
   private val managedChildren = mutable.ArrayBuffer.empty[NodeComponent[? <: Node]]
 
-  final def addChild(child: NodeComponent[? <: Node]): Unit = {
+  protected final def addChild(child: NodeComponent[? <: Node]): Unit = {
     if (managedChildren.exists(_ eq child)) {
       console.warn("Child already in list")
       return
@@ -22,7 +22,7 @@ trait ManagedElementComponent[E <: Node]
     registerSubtree(child)
   }
 
-  private[jfx] final def insertChild(index: Int, child: NodeComponent[? <: Node]): Unit = {
+  protected final def insertChild(index: Int, child: NodeComponent[? <: Node]): Unit = {
     if (managedChildren.exists(_ eq child)) {
       console.warn("Child already in list")
       return
@@ -44,7 +44,7 @@ trait ManagedElementComponent[E <: Node]
     registerSubtree(child)
   }
 
-  private[jfx] final def removeChild(child: NodeComponent[? <: Node]): Unit = {
+  protected final def removeChild(child: NodeComponent[? <: Node]): Unit = {
     val index = managedChildren.indexWhere(_ eq child)
 
     if (index >= 0) {
@@ -63,7 +63,7 @@ trait ManagedElementComponent[E <: Node]
     }
   }
 
-  private[jfx] final def clearChildren(): Unit =
+  protected final def clearChildren(): Unit =
     managedChildren.toVector.foreach(removeChild)
 
   override def dispose(): Unit = {
@@ -71,10 +71,10 @@ trait ManagedElementComponent[E <: Node]
     super.dispose()
   }
 
-  override private[jfx] def attachChild(child: NodeComponent[? <: Node]): Unit =
+  override protected def attachChild(child: NodeComponent[? <: Node]): Unit =
     addChild(child)
 
-  override private[jfx] def detachChild(child: NodeComponent[? <: Node]): Boolean = {
+  override protected def detachChild(child: NodeComponent[? <: Node]): Boolean = {
     val contains = managedChildren.exists(_ eq child)
     if (contains) {
       removeChild(child)
