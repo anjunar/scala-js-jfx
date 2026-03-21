@@ -32,11 +32,7 @@ trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
       }
 
     if (recurse) {
-      component match {
-        case children: ChildrenComponent[?] =>
-          children.childrenProperty.foreach(child => registerSubtree(child, form))
-        case _ => ()
-      }
+      component.childComponentsIterator.foreach(child => registerSubtree(child, form))
     }
   }
 
@@ -54,11 +50,7 @@ trait FormSubtreeRegistration { self: NodeComponent[? <: Node] =>
       }
 
     if (recurse) {
-      component match {
-        case children: ChildrenComponent[?] =>
-          children.childrenProperty.foreach(child => unregisterSubtree(child, form))
-        case _ => ()
-      }
+      component.childComponentsIterator.foreach(child => unregisterSubtree(child, form))
     }
   }
 }

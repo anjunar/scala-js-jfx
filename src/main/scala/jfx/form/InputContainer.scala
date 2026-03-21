@@ -104,12 +104,10 @@ class InputContainer(
     component match {
       case control: Control[?, ?] =>
         Vector(control.asInstanceOf[Control[?, ? <: HTMLElement]])
-      case children: ChildrenComponent[?] =>
-        children.childrenProperty.iterator
+      case _ =>
+        component.childComponentsIterator
           .flatMap(child => collectControls(child))
           .toVector
-      case _ =>
-        Vector.empty
     }
 
   private def isEmptyValue(value: Any): Boolean =

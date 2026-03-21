@@ -115,8 +115,8 @@ trait Formular[M <: Model[M], N <: Node] extends NodeComponent[N] {
     val domParent = control.element.parentNode
 
     control.parent match {
-      case Some(parent: ChildrenComponent[?]) =>
-        parent.removeChild(control)
+      case Some(parent) if parent.detachChild(control) =>
+        ()
       case _ =>
         if (domParent != null) domParent.removeChild(control.element)
         control.parent = None

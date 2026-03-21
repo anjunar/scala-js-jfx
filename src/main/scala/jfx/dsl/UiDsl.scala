@@ -15,7 +15,7 @@ import scala.compiletime.summonFrom
 import scala.scalajs.js
 
 private[dsl] final case class ComponentContext(
-  parent: Option[ChildrenComponent[? <: Node]],
+  parent: Option[NodeComponent[? <: Node]],
   enclosingForm: Option[Formular[?, ?]],
   attachOverride: Option[NodeComponent[? <: Node] => Unit] = None
 )
@@ -605,7 +605,7 @@ private def attach(component: NodeComponent[? <: Node], context: ComponentContex
     case Some(attachOverride) =>
       attachOverride(component)
     case None =>
-      context.parent.foreach(_.addChild(component))
+      context.parent.foreach(_.attachChild(component))
   }
 
 private def currentComponentContext(): ComponentContext =
@@ -652,7 +652,7 @@ private def appendConditionalBranch(
 
 private[jfx] object DslRuntime {
   def withCompositeContext[A](
-    parent: ChildrenComponent[? <: Node],
+    parent: NodeComponent[? <: Node],
     context: CompositeComponent.DslContext
   )(block: => A): A =
     withComponentContext(ComponentContext(Some(parent), context.enclosingForm))(block)

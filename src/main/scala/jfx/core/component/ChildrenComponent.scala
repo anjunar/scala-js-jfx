@@ -37,5 +37,19 @@ trait ChildrenComponent[E <: Node] extends ElementComponent[E] {
   def clearChildren(): Unit =
     childrenProperty.clear()
 
+  override private[jfx] def attachChild(child: NodeComponent[? <: Node]): Unit =
+    addChild(child)
+
+  override private[jfx] def detachChild(child: NodeComponent[? <: Node]): Boolean = {
+    val containsChild = childrenProperty.contains(child)
+    if (containsChild) {
+      removeChild(child)
+    }
+    containsChild
+  }
+
+  override private[jfx] def childComponentsIterator: Iterator[NodeComponent[? <: Node]] =
+    childrenProperty.iterator
+
 
 }

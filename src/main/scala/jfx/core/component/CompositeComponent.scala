@@ -3,11 +3,16 @@ package jfx.core.component
 import jfx.dsl.Scope
 import jfx.dsl.DslRuntime
 import jfx.form.Formular
-import org.scalajs.dom.Node
+import org.scalajs.dom.{Node, console}
 
-trait CompositeComponent[N <: Node] extends NativeComponent[N] {
+import scala.collection.mutable
+
+trait CompositeComponent[N <: Node]
+    extends ElementComponent[N], FormSubtreeRegistration {
 
   import CompositeComponent.DslContext
+
+  private val compositeChildren = mutable.ArrayBuffer.empty[NodeComponent[? <: Node]]
 
   protected def compose(using DslContext): Unit
 
@@ -27,6 +32,60 @@ trait CompositeComponent[N <: Node] extends NativeComponent[N] {
 
   protected final def injectFromDsl[T](using context: DslContext, key: Scope.ServiceKey[T]): T =
     context.scope.inject[T]
+
+  protected final def addChild(child: NodeComponent[? <: Node]): Unit = {
+    if (compositeChildren.exists(_ eq child)) {
+      console.warn("Child already in list")
+      return
+    }
+
+    compositeChildren += child
+    element.appendChild(child.element)
+    child.parent = Some(this)
+    child.onMount()
+    registerSubtree(child)
+  }
+
+  protected final def removeChild(child: NodeComponent[? <: Node]): Unit = {
+    val index = compositeChildren.indexWhere(_ eq child)
+
+    if (index >= 0) {
+      compositeChildren.remove(index)
+
+      val parent = child.element.parentNode
+      if (parent == element) {
+        element.removeChild(child.element)
+      } else if (parent != null) {
+        parent.removeChild(child.element)
+      }
+
+      child.parent = None
+      child.dispose()
+      unregisterSubtree(child)
+    }
+  }
+
+  protected final def clearChildren(): Unit =
+    compositeChildren.toVector.foreach(removeChild)
+
+  override def dispose(): Unit = {
+    clearChildren()
+    super.dispose()
+  }
+
+  override private[jfx] def attachChild(child: NodeComponent[? <: Node]): Unit =
+    addChild(child)
+
+  override private[jfx] def detachChild(child: NodeComponent[? <: Node]): Boolean = {
+    val containsChild = compositeChildren.exists(_ eq child)
+    if (containsChild) {
+      removeChild(child)
+    }
+    containsChild
+  }
+
+  override private[jfx] def childComponentsIterator: Iterator[NodeComponent[? <: Node]] =
+    compositeChildren.iterator
 }
 
 object CompositeComponent {
