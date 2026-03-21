@@ -52,7 +52,9 @@ class ImageCropper(val name: String) extends Control[Media, HTMLDivElement] {
   private var uploadButton: HTMLButtonElement = null
   private var cropButton: HTMLButtonElement = null
   private var clearButton: HTMLButtonElement = null
+  private var previewFrame: HTMLDivElement = null
   private var previewImg: HTMLImageElement = null
+  private var previewPlaceholder: HTMLDivElement = null
 
   override lazy val element: HTMLDivElement = {
     val div = newElement("div")
@@ -82,12 +84,8 @@ class ImageCropper(val name: String) extends Control[Media, HTMLDivElement] {
   })
 
   addDisposable(placeholderProperty.observe { value =>
-    if (structureInitialized && previewImg != null) {
-      previewImg.alt =
-        Option(value)
-          .map(_.trim)
-          .filter(_.nonEmpty)
-          .getOrElse("Kein Bild ausgewaehlt")
+    if (structureInitialized) {
+      syncPlaceholder(value)
     }
   })
 
@@ -124,13 +122,41 @@ class ImageCropper(val name: String) extends Control[Media, HTMLDivElement] {
       cropButton = newButton("Zuschneiden")
       clearButton = newButton("Leeren")
 
+      previewFrame = newElement("div").asInstanceOf[HTMLDivElement]
+      previewFrame.style.setProperty("flex", "1 1 auto")
+      previewFrame.style.width = "100%"
+      previewFrame.style.minWidth = "0"
+      previewFrame.style.minHeight = "0"
+      previewFrame.style.display = "flex"
+      previewFrame.style.setProperty("align-items", "center")
+      previewFrame.style.setProperty("justify-content", "center")
+      previewFrame.style.position = "relative"
+      previewFrame.style.overflow = "hidden"
+      previewFrame.style.border = "1px solid var(--color-background-secondary)"
+      previewFrame.style.borderRadius = "6px"
+      previewFrame.style.background = "var(--color-background-primary)"
+
       previewImg = newElement("img").asInstanceOf[HTMLImageElement]
       previewImg.classList.add("preview")
-      previewImg.alt =
-        Option(placeholderProperty.get)
-          .map(_.trim)
-          .filter(_.nonEmpty)
-          .getOrElse("Kein Bild ausgewaehlt")
+      previewImg.style.display = "none"
+      previewImg.style.width = "100%"
+      previewImg.style.height = "100%"
+      previewImg.style.minWidth = "0"
+      previewImg.style.minHeight = "0"
+      previewImg.style.border = "0"
+      previewImg.style.borderRadius = "0"
+
+      previewPlaceholder = newElement("div").asInstanceOf[HTMLDivElement]
+      previewPlaceholder.style.width = "100%"
+      previewPlaceholder.style.height = "100%"
+      previewPlaceholder.style.display = "flex"
+      previewPlaceholder.style.setProperty("align-items", "center")
+      previewPlaceholder.style.setProperty("justify-content", "center")
+      previewPlaceholder.style.textAlign = "center"
+      previewPlaceholder.style.padding = "16px"
+      previewPlaceholder.style.color = "var(--color-neutral-500)"
+
+      syncPlaceholder(placeholderProperty.get)
 
       toolbar.appendChild(fileInput)
       toolbar.appendChild(uploadButton)
@@ -138,7 +164,9 @@ class ImageCropper(val name: String) extends Control[Media, HTMLDivElement] {
       toolbar.appendChild(clearButton)
 
       root.appendChild(toolbar)
-      root.appendChild(previewImg)
+      previewFrame.appendChild(previewImg)
+      previewFrame.appendChild(previewPlaceholder)
+      root.appendChild(previewFrame)
 
       installListeners()
       syncPreview(valueProperty.get)
@@ -274,9 +302,28 @@ class ImageCropper(val name: String) extends Control[Media, HTMLDivElement] {
     Option(media).flatMap(previewSrc) match {
       case Some(src) =>
         previewImg.src = src
+        previewImg.style.display = "block"
+        previewPlaceholder.style.display = "none"
       case None =>
         previewImg.removeAttribute("src")
+        previewImg.style.display = "none"
+        previewPlaceholder.style.display = "flex"
     }
+
+  private def syncPlaceholder(value: String): Unit = {
+    val text =
+      Option(value)
+        .map(_.trim)
+        .filter(_.nonEmpty)
+        .getOrElse("Kein Bild ausgewaehlt")
+
+    if (previewImg != null) {
+      previewImg.alt = text
+    }
+    if (previewPlaceholder != null) {
+      previewPlaceholder.textContent = text
+    }
+  }
 
   private def syncButtons(): Unit = {
     val editable = editableProperty.get

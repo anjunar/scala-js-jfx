@@ -4,7 +4,7 @@ import jfx.action.Button
 import jfx.core.component.{ManagedElementComponent, NodeComponent}
 import jfx.core.state.Property
 import jfx.domain.Media
-import org.scalajs.dom.{Event, HTMLDivElement, HTMLElement, MouseEvent, Node, PointerEvent, window as browserWindow}
+import org.scalajs.dom.{Event, HTMLDivElement, HTMLElement, Node, PointerEvent, window as browserWindow}
 
 import scala.scalajs.js
 import scala.scalajs.js.timers.{SetTimeoutHandle, clearTimeout, setTimeout}
@@ -54,7 +54,6 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
 
   private var structureInitialized = false
   private var didRunOpenSequence = false
-  private var activePointerId: Double | Null = null
   private var activePointerCleanup: Option[Boolean => Unit] = None
   private var openAnimationHandle: Option[SetTimeoutHandle] = None
 
@@ -422,16 +421,10 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
     startEvent.preventDefault()
     startEvent.stopPropagation()
 
-    activePointerId = startEvent.pointerId
-
     val moveListener: js.Function1[Event, Unit] = {
       case event: PointerEvent if event.pointerId == startEvent.pointerId =>
-        if (pointerButtonsReleased(event)) {
-          stopActivePointerInteraction(persistState = true)
-        } else {
-          event.preventDefault()
-          onMove(event)
-        }
+        event.preventDefault()
+        onMove(event)
       case _ => ()
     }
 
@@ -442,29 +435,10 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
         ()
     }
 
-    val blurListener: js.Function1[Event, Unit] = _ => stopActivePointerInteraction(persistState = true)
-    val mouseUpFallback: js.Function1[Event, Unit] = {
-      case _: MouseEvent => stopActivePointerInteraction(persistState = true)
-      case _             => ()
-    }
-    val nextPointerDownListener: js.Function1[Event, Unit] = {
-      case event: PointerEvent if event.pointerId == startEvent.pointerId && event.target != startEvent.target =>
-        stopActivePointerInteraction(persistState = true)
-      case event: PointerEvent if activePointerId == startEvent.pointerId && event.pointerId != startEvent.pointerId =>
-        stopActivePointerInteraction(persistState = true)
-      case _ =>
-        ()
-    }
-
-    browserWindow.addEventListener("pointermove", moveListener)
-    browserWindow.addEventListener("pointerup", finishListener)
-    browserWindow.addEventListener("pointercancel", finishListener)
-    browserWindow.addEventListener("pointerdown", nextPointerDownListener)
-    browserWindow.addEventListener("mouseup", mouseUpFallback)
+    captureTarget.addEventListener("pointermove", moveListener)
     captureTarget.addEventListener("pointerup", finishListener)
     captureTarget.addEventListener("pointercancel", finishListener)
     captureTarget.addEventListener("lostpointercapture", finishListener)
-    browserWindow.addEventListener("blur", blurListener)
 
     try {
       captureTarget.setPointerCapture(startEvent.pointerId)
@@ -473,16 +447,10 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
     }
 
     activePointerCleanup = Some { persistState =>
-      activePointerId = null
-      browserWindow.removeEventListener("pointermove", moveListener)
-      browserWindow.removeEventListener("pointerup", finishListener)
-      browserWindow.removeEventListener("pointercancel", finishListener)
-      browserWindow.removeEventListener("pointerdown", nextPointerDownListener)
-      browserWindow.removeEventListener("mouseup", mouseUpFallback)
+      captureTarget.removeEventListener("pointermove", moveListener)
       captureTarget.removeEventListener("pointerup", finishListener)
       captureTarget.removeEventListener("pointercancel", finishListener)
       captureTarget.removeEventListener("lostpointercapture", finishListener)
-      browserWindow.removeEventListener("blur", blurListener)
 
       try {
         if (captureTarget.hasPointerCapture(startEvent.pointerId)) {
@@ -497,9 +465,6 @@ final class Window extends ManagedElementComponent[HTMLDivElement] {
       }
     }
   }
-
-  private def pointerButtonsReleased(event: PointerEvent): Boolean =
-    event.buttons == 0
 
   private def isPrimaryPointerButton(event: PointerEvent): Boolean =
     event.button == 0
