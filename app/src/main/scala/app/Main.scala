@@ -19,7 +19,7 @@ import org.scalajs.dom.document
 
 object Main {
 
-  def main(args: Array[String]): Unit =
+  def main(args: Array[String]): Unit = {
     scope {
       singleton[Router] {
         Router(Routes.routes)
@@ -121,4 +121,5 @@ object Main {
 
       document.getElementById("root").appendChild(container.element)
     }
+  }
 }
