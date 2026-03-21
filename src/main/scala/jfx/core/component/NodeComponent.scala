@@ -1,6 +1,7 @@
 package jfx.core.component
 
 import jfx.core.state.{CompositeDisposable, Disposable}
+import jfx.dsl.DslRuntime
 import jfx.form.{ArrayForm, Formular}
 import org.scalajs.dom.{Comment, HTMLFieldSetElement, Node}
 
@@ -48,5 +49,15 @@ trait NodeComponent [E <: Node] extends Disposable {
   private[jfx] def childComponentsIterator: Iterator[NodeComponent[? <: Node]] =
     Iterator.empty
 
+}
+
+object NodeComponent {
+
+  def mount[C <: NodeComponent[? <: Node]](component: C): C =
+    DslRuntime.currentScope { _ =>
+      val currentContext = DslRuntime.currentComponentContext()
+      DslRuntime.attach(component, currentContext)
+      component
+    }
 }
 

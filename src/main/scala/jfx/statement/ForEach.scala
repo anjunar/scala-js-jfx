@@ -3,6 +3,7 @@ package jfx.statement
 import jfx.core.component.{FormSubtreeRegistration, NodeComponent}
 import jfx.core.state.ListProperty
 import jfx.core.state.ListProperty.*
+import jfx.dsl.DslRuntime
 import org.scalajs.dom.{Comment, Node, console, window}
 
 import scala.scalajs.js
@@ -224,4 +225,15 @@ class ForEach[T](
 object ForEach {
   def apply[T](items: ListProperty[T])(renderItem: (T, Int) => NodeComponent[? <: Node]): ForEach[T] =
     new ForEach(items, renderItem)
+
+  def forEach[T](items: ListProperty[T])(renderItem: (T, Int) => NodeComponent[? <: Node]): ForEach[T] =
+    DslRuntime.currentScope { _ =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new ForEach(items, renderItem)
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def forEach[T](items: ListProperty[T])(renderItem: T => NodeComponent[? <: Node]): ForEach[T] =
+    forEach(items) { (item, _) => renderItem(item) }
 }

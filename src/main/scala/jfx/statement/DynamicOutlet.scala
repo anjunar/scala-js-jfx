@@ -2,6 +2,7 @@ package jfx.statement
 
 import jfx.core.component.{FormSubtreeRegistration, NodeComponent}
 import jfx.core.state.ReadOnlyProperty
+import jfx.dsl.DslRuntime
 import org.scalajs.dom.{Comment, Node, console}
 
 class DynamicOutlet(
@@ -139,4 +140,18 @@ class DynamicOutlet(
 object DynamicOutlet {
   def apply(content: ReadOnlyProperty[? <: NodeComponent[? <: Node] | Null]): DynamicOutlet =
     new DynamicOutlet(content)
+
+  def outlet(content: ReadOnlyProperty[? <: NodeComponent[? <: Node] | Null]): DynamicOutlet =
+    DslRuntime.currentScope { _ =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new DynamicOutlet(content)
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def dynamicOutlet(content: ReadOnlyProperty[? <: NodeComponent[? <: Node] | Null]): DynamicOutlet =
+    outlet(content)
+
+  def outletContent(using outlet: DynamicOutlet): ReadOnlyProperty[? <: NodeComponent[? <: Node] | Null] =
+    outlet.content
 }

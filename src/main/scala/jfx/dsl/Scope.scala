@@ -67,6 +67,25 @@ final class Scope private (val parent: Option[Scope]) {
 
 object Scope {
 
+  def scope[A](block: Scope ?=> A)(using currentScope: Scope | Null = null): A =
+    val nextScope =
+      if (currentScope == null) Scope.root()
+      else currentScope.child()
+
+    block(using nextScope)
+
+  def singleton[T](provider: Scope ?=> T)(using scope: Scope, key: Scope.ServiceKey[T]): Unit =
+    scope.singleton(provider)
+
+  def scoped[T](provider: Scope ?=> T)(using scope: Scope, key: Scope.ServiceKey[T]): Unit =
+    scope.scoped(provider)
+
+  def transient[T](provider: Scope ?=> T)(using scope: Scope, key: Scope.ServiceKey[T]): Unit =
+    scope.transient(provider)
+
+  def inject[T](using scope: Scope, key: Scope.ServiceKey[T]): T =
+    scope.inject[T]
+
   def root(): Scope =
     new Scope(None)
 

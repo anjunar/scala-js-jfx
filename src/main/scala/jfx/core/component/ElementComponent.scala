@@ -93,4 +93,55 @@ object ElementComponent {
     normalized.toVector
   }
 
+  def text(using component: ElementComponent[?]): String =
+    component.textContent
+
+  def text_=(value: String)(using component: ElementComponent[?]): Unit =
+    component.textContent = value
+
+  def classes(using component: ElementComponent[?]): ListProperty[String] =
+    component.classProperty
+
+  def classes_=(value: String)(using component: ElementComponent[?]): Unit =
+    classes_=(Seq(value))
+
+  def classes_=(value: IterableOnce[String])(using component: ElementComponent[?]): Unit =
+    component.classProperty.setAll(normalizeClassNames(value))
+
+  def addClass(value: String)(using component: ElementComponent[?]): Unit =
+    addClasses(Seq(value))
+
+  def addClasses(values: IterableOnce[String])(using component: ElementComponent[?]): Unit = {
+    val additions = normalizeClassNames(values)
+    if (additions.nonEmpty) {
+      updateClasses(component) { current =>
+        current ++ additions.filterNot(current.contains)
+      }
+    }
+  }
+
+  def removeClass(value: String)(using component: ElementComponent[?]): Unit =
+    removeClasses(Seq(value))
+
+  def removeClasses(values: IterableOnce[String])(using component: ElementComponent[?]): Unit = {
+    val removed = normalizeClassNames(values).toSet
+    if (removed.nonEmpty) {
+      updateClasses(component) { current =>
+        current.filterNot(removed.contains)
+      }
+    }
+  }
+
+  private def updateClasses(
+    component: ElementComponent[?]
+  )(update: Vector[String] => Vector[String]): Unit = {
+    val currentRaw = component.classProperty.iterator.toVector
+    val current = normalizeClassNames(currentRaw)
+    val next = normalizeClassNames(update(current))
+
+    if (currentRaw != next) {
+      component.classProperty.setAll(next)
+    }
+  }
+
 }

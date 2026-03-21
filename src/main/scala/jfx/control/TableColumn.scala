@@ -1,6 +1,9 @@
 package jfx.control
 
 import jfx.core.state.{CompositeDisposable, Disposable, Property, ReadOnlyProperty}
+import jfx.dsl.{DslRuntime, Scope}
+
+import scala.collection.mutable
 
 class TableColumn[S, T](initialText: String = "") {
 
@@ -110,6 +113,85 @@ class TableColumn[S, T](initialText: String = "") {
 }
 
 object TableColumn {
+
+  private val enclosingTableViewStack = mutable.ArrayBuffer.empty[TableView[?]]
+
+  def tableColumn[S, T](text: String): TableColumn[S, T] =
+    tableColumn(text)({})
+
+  def tableColumn[S, T](text: String)(init: TableColumn[S, T] ?=> Unit): TableColumn[S, T] =
+    DslRuntime.currentScope { currentScope =>
+      val component = new TableColumn[S, T](text)
+      given Scope = currentScope
+      given TableColumn[S, T] = component
+      init
+      currentEnclosingTableView[S]().foreach(_.columnsProperty += component)
+      component
+    }
+
+  def column[S, T](text: String): TableColumn[S, T] =
+    tableColumn(text)
+
+  def column[S, T](text: String)(init: TableColumn[S, T] ?=> Unit): TableColumn[S, T] =
+    tableColumn(text)(init)
+
+  def header(using component: TableColumn[?, ?]): String =
+    component.getText
+
+  def header_=(value: String)(using component: TableColumn[?, ?]): Unit =
+    component.setText(value)
+
+  def prefWidth(using tableColumn: TableColumn[?, ?]): Double =
+    tableColumn.getPrefWidth
+
+  def prefWidth_=(value: Double)(using tableColumn: TableColumn[?, ?]): Unit =
+    tableColumn.setPrefWidth(value)
+
+  def columnMaxWidth(using tableColumn: TableColumn[?, ?]): Double =
+    tableColumn.getMaxWidth
+
+  def sortable(using tableColumn: TableColumn[?, ?]): Boolean =
+    tableColumn.isSortable
+
+  def sortable_=(value: Boolean)(using tableColumn: TableColumn[?, ?]): Unit =
+    tableColumn.setSortable(value)
+
+  def sortKey(using tableColumn: TableColumn[?, ?]): String | Null =
+    tableColumn.getSortKey
+
+  def sortKey_=(value: String | Null)(using tableColumn: TableColumn[?, ?]): Unit =
+    tableColumn.setSortKey(value)
+
+  def resizable(using tableColumn: TableColumn[?, ?]): Boolean =
+    tableColumn.isResizable
+
+  def resizable_=(value: Boolean)(using tableColumn: TableColumn[?, ?]): Unit =
+    tableColumn.setResizable(value)
+
+  def cellValueFactory[S, T](using tableColumn: TableColumn[S, T]): TableColumn.CellDataFeatures[S, T] => ReadOnlyProperty[T] | Null =
+    tableColumn.getCellValueFactory
+
+  def cellValueFactory_=[S, T](
+    factory: TableColumn.CellDataFeatures[S, T] => ReadOnlyProperty[T] | Null
+  )(using tableColumn: TableColumn[S, T]): Unit =
+    tableColumn.setCellValueFactory(factory)
+
+  def cellFactory[S, T](using tableColumn: TableColumn[S, T]): TableColumn[S, T] => TableCell[S, T] | Null =
+    tableColumn.getCellFactory
+
+  def cellFactory_=[S, T](
+    factory: TableColumn[S, T] => TableCell[S, T] | Null
+  )(using tableColumn: TableColumn[S, T]): Unit =
+    tableColumn.setCellFactory(factory)
+
+  private[control] def withEnclosingTableView[S, A](tableView: TableView[S])(block: => A): A = {
+    enclosingTableViewStack += tableView
+    try block
+    finally enclosingTableViewStack.remove(enclosingTableViewStack.length - 1)
+  }
+
+  private def currentEnclosingTableView[S](): Option[TableView[S]] =
+    enclosingTableViewStack.lastOption.map(_.asInstanceOf[TableView[S]])
 
   final case class CellDataFeatures[S, T](
     tableView: TableView[S],

@@ -2,6 +2,7 @@ package jfx.control
 
 import jfx.core.component.{ElementComponent, FormSubtreeRegistration, NodeComponent}
 import jfx.core.state.{CompositeDisposable, Disposable, ListProperty, Property, RemoteListProperty}
+import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.{Event, HTMLDivElement, Node, window}
 
 import scala.concurrent.ExecutionContext
@@ -658,6 +659,54 @@ object TableView {
   private[control] val ascendingIndicator = "\u2191"
   private[control] val descendingIndicator = "\u2193"
   private[control] val noopDisposable: Disposable = () => ()
+
+  def tableView[S](init: TableView[S] ?=> Unit): TableView[S] =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new TableView[S]()
+      DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
+        given Scope = currentScope
+        given TableView[S] = component
+        TableColumn.withEnclosingTableView(component) {
+          init
+        }
+      }
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def items[S](using tableView: TableView[S]): ListProperty[S] =
+    tableView.items
+
+  def items_=[S](value: ListProperty[S])(using tableView: TableView[S]): Unit =
+    tableView.items = value
+
+  def fixedCellSize(using tableView: TableView[?]): Double =
+    tableView.getFixedCellSize
+
+  def fixedCellSize_=(value: Double)(using tableView: TableView[?]): Unit =
+    tableView.setFixedCellSize(value)
+
+  def rowFactory[S](using tableView: TableView[S]): TableView[S] => TableRow[S] =
+    tableView.getRowFactory
+
+  def rowFactory_=[S](factory: TableView[S] => TableRow[S])(using tableView: TableView[S]): Unit =
+    tableView.setRowFactory(factory)
+
+  def selectionModel[S](using tableView: TableView[S]): TableViewSelectionModel[S] =
+    tableView.getSelectionModel
+
+  def refresh(using tableView: TableView[?]): Unit =
+    tableView.refresh()
+
+  def scrollTo(index: Int)(using tableView: TableView[?]): Unit =
+    tableView.scrollTo(index)
+
+  def placeholderNode(using tableView: TableView[?]): NodeComponent[? <: Node] | Null =
+    tableView.getPlaceholder
+
+  def placeholder_=(value: NodeComponent[? <: Node] | Null)(using tableView: TableView[?]): Unit =
+    tableView.setPlaceholder(value)
 }
 
 class TableViewSelectionModel[S](tableView: TableView[S]) extends Disposable {

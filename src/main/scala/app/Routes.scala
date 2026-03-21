@@ -1,8 +1,11 @@
 package app
 
 import app.pages.{formPage, tablePage}
+import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
+import jfx.layout.Div.div
 import jfx.router.Route
+import jfx.router.RouteContext.routeContext
 
 import scala.scalajs.js
 

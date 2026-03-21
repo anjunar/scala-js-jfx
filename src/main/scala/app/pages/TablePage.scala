@@ -2,13 +2,21 @@ package app.pages
 
 import app.component.AddressForm
 import app.domain.{Address, Email, Person}
+import jfx.action.Button.*
 import jfx.control.{TableColumn, TableView}
+import jfx.control.TableColumn.*
+import jfx.control.TableView.*
 import jfx.control.cell.PropertyValueFactory
 import jfx.core.component.CompositeComponent
+import jfx.core.component.CompositeComponent.composite
+import jfx.core.component.ElementComponent.*
 import jfx.core.state.{ListProperty, Property}
 import jfx.dsl.*
 import jfx.form.Input
+import jfx.form.Input.{input, placeholder, placeholder_=}
 import jfx.layout.Div
+import jfx.layout.Div.div
+import jfx.layout.HBox.hbox
 import org.scalajs.dom
 import org.scalajs.dom.{HTMLDivElement, KeyboardEvent}
 

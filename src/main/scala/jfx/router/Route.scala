@@ -16,6 +16,11 @@ case class RouteContext(
   routeMatch: RouteMatch
 )
 
+object RouteContext {
+  def routeContext(using context: RouteContext): RouteContext =
+    context
+}
+
 case class Route(
   path: String,
   factory: Route.Factory,

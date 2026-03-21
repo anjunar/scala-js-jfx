@@ -1,7 +1,11 @@
 package jfx.form
 
 import jfx.core.component.{ChildrenComponent, CompositeComponent, NodeComponent}
-import jfx.dsl.*
+import jfx.core.component.CompositeComponent.composite
+import jfx.core.component.ElementComponent.{classes, classes_=, text, text_=}
+import jfx.layout.Div.div
+import jfx.layout.HorizontalLine.hr
+import jfx.layout.Span.span
 import jfx.layout.{Div, HorizontalLine, Span}
 import org.scalajs.dom.{Element, HTMLDivElement, HTMLElement, Node}
 
@@ -130,14 +134,17 @@ class InputContainer(
     else node.classList.remove(className)
 }
 
-def inputContainer(placeholder: String)(init: InputContainer ?=> Unit = {}): InputContainer =
-  composite(new InputContainer(placeholder, init))
+object InputContainer {
 
-def inputContainer(
-  placeholder: String,
-  control: => Control[?, ? <: HTMLElement]
-): InputContainer =
-  inputContainer(placeholder) {
-    control
-    ()
-  }
+  def inputContainer(placeholder: String)(init: InputContainer ?=> Unit = {}): InputContainer =
+    composite(new InputContainer(placeholder, init))
+
+  def inputContainer(
+    placeholder: String,
+    control: => Control[?, ? <: HTMLElement]
+  ): InputContainer =
+    inputContainer(placeholder) {
+      control
+      ()
+    }
+}

@@ -1,6 +1,7 @@
 package jfx.form
 
 import jfx.core.state.Property
+import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.{Event, HTMLInputElement}
 
 class Input(val name: String) extends Control[String | Boolean | Double, HTMLInputElement] {
@@ -64,4 +65,41 @@ class Input(val name: String) extends Control[String | Boolean | Double, HTMLInp
     }
 
   override def toString = s"Input($valueProperty, $name)"
+}
+
+object Input {
+
+  def input(name: String): Input =
+    input(name)({})
+
+  def input(name: String)(init: Input ?=> Unit): Input =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new Input(name)
+      DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
+        given Scope = currentScope
+        given Input = component
+        init
+      }
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def placeholder(using component: Input): String =
+    component.placeholder
+
+  def placeholder_=(value: String)(using component: Input): Unit =
+    component.placeholder = value
+
+  def value(using input: Input): String | Boolean | Double =
+    input.valueProperty.get
+
+  def value_=(nextValue: String | Boolean | Double)(using input: Input): Unit =
+    input.valueProperty.set(nextValue)
+
+  def inputType(using input: Input): String =
+    input.element.`type`
+
+  def inputType_=(value: String)(using input: Input): Unit =
+    input.element.`type` = value
 }

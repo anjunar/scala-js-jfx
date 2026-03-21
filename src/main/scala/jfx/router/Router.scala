@@ -2,7 +2,7 @@ package jfx.router
 
 import jfx.core.component.NodeComponent
 import jfx.core.state.Property
-import jfx.dsl.Scope
+import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import jfx.statement.DynamicOutlet
 import org.scalajs.dom.{Comment, Event, Node, console, window}
 
@@ -276,4 +276,42 @@ class Router(val routes: js.Array[Route], private val scope: Scope) extends Node
 object Router {
   def apply(routes: js.Array[Route])(using scope: Scope): Router =
     new Router(routes, scope)
+
+  def router(routes: js.Array[Route]): Router =
+    router(routes)({})
+
+  def router(routes: js.Array[Route])(init: Router ?=> Unit): Router =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      given Scope = currentScope
+      val component = Router(routes)
+      DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
+        given Scope = currentScope
+        given Router = component
+        init
+      }
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def routerContent(using router: Router): Property[NodeComponent[? <: Node] | Null] =
+    router.contentProperty
+
+  def routerLoading(using router: Router): Boolean =
+    router.loadingProperty.get
+
+  def routerError(using router: Router): Option[Throwable] =
+    router.errorProperty.get
+
+  def routerState(using router: Router): RouterState =
+    router.state
+
+  def navigate(path: String)(using router: Router): Unit =
+    router.navigate(path)
+
+  def replace(path: String)(using router: Router): Unit =
+    router.replace(path)
+
+  def reload(using router: Router): Unit =
+    router.reload()
 }

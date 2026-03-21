@@ -2,8 +2,12 @@ package app.component
 
 import app.domain.Address
 import jfx.core.component.CompositeComponent
+import jfx.core.component.CompositeComponent.composite
+import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
-import jfx.form.inputContainer
+import jfx.form.Input.input
+import jfx.form.InputContainer.inputContainer
+import jfx.form.SubForm.subForm
 import org.scalajs.dom.HTMLDivElement
 
 final class AddressForm(slot: AddressForm ?=> Unit = ()) extends CompositeComponent[HTMLDivElement] {

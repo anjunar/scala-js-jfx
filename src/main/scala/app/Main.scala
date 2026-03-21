@@ -1,11 +1,21 @@
 package app
 
+import jfx.action.Button.*
+import jfx.core.component.ElementComponent.*
+import jfx.core.component.NodeComponent.mount
 import jfx.core.state.Property
 import jfx.dsl.*
+import jfx.dsl.Scope.{inject, scope, singleton}
+import jfx.layout.Div.div
+import jfx.layout.Drawer.*
+import jfx.layout.HBox.hbox
+import jfx.layout.VBox.vbox
 import jfx.layout.Viewport
 import jfx.layout.Viewport.WindowConf
+import jfx.layout.Viewport.viewport
 import jfx.router.Router
 import org.scalajs.dom.document
+
 
 object Main {
 

@@ -95,4 +95,14 @@ object CompositeComponent {
     enclosingForm: Option[Formular[?, ?]]
   )
 
+  def composite[C <: CompositeComponent[? <: Node]](component: C): C =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      given DslContext =
+        DslContext(currentScope, currentContext.enclosingForm)
+      component.renderComposite
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
 }

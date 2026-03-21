@@ -2,6 +2,7 @@ package jfx.control
 
 import jfx.core.component.NativeComponent
 import jfx.core.state.Property
+import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.HTMLDivElement
 
 class TableCell[S, T] extends NativeComponent[HTMLDivElement] {
@@ -100,4 +101,35 @@ class TableCell[S, T] extends NativeComponent[HTMLDivElement] {
     if (lastColumn) element.classList.add("jfx-table-cell-last")
     else element.classList.remove("jfx-table-cell-last")
   }
+}
+
+object TableCell {
+
+  def tableCell[S, T](init: TableCell[S, T] ?=> Unit): TableCell[S, T] =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new TableCell[S, T]()
+      DslRuntime.withComponentContext(ComponentContext(Some(component), currentContext.enclosingForm)) {
+        given Scope = currentScope
+        given TableCell[S, T] = component
+        init
+      }
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def cell[S, T](init: TableCell[S, T] ?=> Unit): TableCell[S, T] =
+    tableCell(init)
+
+  def cellItem[S, T](using tableCell: TableCell[S, T]): T | Null =
+    tableCell.getItem
+
+  def cellIndex(using tableCell: TableCell[?, ?]): Int =
+    tableCell.getIndex
+
+  def cellEmpty(using tableCell: TableCell[?, ?]): Boolean =
+    tableCell.isEmpty
+
+  def cellSelected(using tableCell: TableCell[?, ?]): Boolean =
+    tableCell.isSelected
 }

@@ -3,6 +3,7 @@ package jfx.form
 import jfx.core.component.{ChildrenComponent, ElementComponent, NativeComponent, NodeComponent}
 import jfx.core.state.{ListProperty, Property}
 import jfx.core.state.ListProperty.*
+import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.{Event, HTMLElement, HTMLFormElement, Node}
 
 class Form[M <: Model[M]](model : M) extends NativeComponent[HTMLFormElement], Formular[M, HTMLFormElement] {
@@ -27,4 +28,26 @@ class Form[M <: Model[M]](model : M) extends NativeComponent[HTMLFormElement], F
   def onSubmit_=(listener: Event => Unit): Unit =
     submitHandler = if (listener == null) _ => () else listener
   
+}
+
+object Form {
+
+  def form[M <: Model[M]](model: M)(init: Form[M] ?=> Unit): Form[M] =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new Form(model)
+      DslRuntime.withComponentContext(ComponentContext(Some(component), Some(component))) {
+        given Scope = currentScope
+        given Form[M] = component
+        init
+      }
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def onSubmit(using form: Form[?]): Event => Unit =
+    form.onSubmit
+
+  def onSubmit_=(listener: Event => Unit)(using form: Form[?]): Unit =
+    form.onSubmit = listener
 }

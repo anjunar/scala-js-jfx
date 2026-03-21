@@ -3,9 +3,16 @@ package app.pages
 import app.component.addressForm
 import app.domain.{Address, Email, Person}
 import jfx.core.component.CompositeComponent
+import jfx.core.component.ElementComponent.*
 import jfx.dsl.*
-import jfx.form.inputContainer
+import jfx.dsl.Scope.{inject, scope, scoped, singleton}
+import jfx.action.Button.button
+import jfx.core.component.CompositeComponent.composite
+import jfx.form.Form.{form, onSubmit, onSubmit_=}
+import jfx.form.Input.input
+import jfx.form.InputContainer.inputContainer
 import jfx.json.{JsonMapper, JsonRegistry}
+import jfx.layout.Div.div
 import org.scalajs.dom.HTMLDivElement
 
 import scala.scalajs.js
@@ -124,4 +131,3 @@ class FormPage extends CompositeComponent[HTMLDivElement] {
 
 def formPage(init: FormPage ?=> Unit = {}): FormPage =
   composite(new FormPage())
-

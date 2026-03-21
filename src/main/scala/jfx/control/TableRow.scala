@@ -2,6 +2,7 @@ package jfx.control
 
 import jfx.core.component.NativeComponent
 import jfx.core.state.{Disposable, Property}
+import jfx.dsl.{ComponentContext, DslRuntime, Scope}
 import org.scalajs.dom.HTMLDivElement
 
 class TableRow[S] extends NativeComponent[HTMLDivElement] {
@@ -226,4 +227,35 @@ class TableRow[S] extends NativeComponent[HTMLDivElement] {
 
 object TableRow {
   private val noopDisposable: Disposable = () => ()
+
+  def tableRow[S](init: TableRow[S] ?=> Unit): TableRow[S] =
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val component = new TableRow[S]()
+      DslRuntime.withComponentContext(ComponentContext(Some(component), currentContext.enclosingForm)) {
+        given Scope = currentScope
+        given TableRow[S] = component
+        init
+      }
+      DslRuntime.attach(component, currentContext)
+      component
+    }
+
+  def row[S](init: TableRow[S] ?=> Unit): TableRow[S] =
+    tableRow(init)
+
+  def rowItem[S](using tableRow: TableRow[S]): S | Null =
+    tableRow.getItem
+
+  def rowIndex(using tableRow: TableRow[?]): Int =
+    tableRow.getIndex
+
+  def rowEmpty(using tableRow: TableRow[?]): Boolean =
+    tableRow.isEmpty
+
+  def rowSelected(using tableRow: TableRow[?]): Boolean =
+    tableRow.isSelected
+
+  def rowPlaceholder(using tableRow: TableRow[?]): Boolean =
+    tableRow.isPlaceholder
 }

@@ -1,10 +1,13 @@
 package jfx.layout
 
-import java.util.UUID
+import jfx.core.component.CompositeComponent.composite
+import jfx.core.component.NodeComponent.mount
 
+import java.util.UUID
 import jfx.core.component.{CompositeComponent, NativeComponent, NodeComponent}
 import jfx.core.state.{Disposable, ListProperty, Property}
 import jfx.dsl.*
+import jfx.statement.ForEach.forEach
 import org.scalajs.dom.{Event, HTMLDivElement, HTMLElement, Node, window}
 
 import scala.scalajs.js.timers.setTimeout
@@ -111,6 +114,9 @@ final class Viewport(slot: Viewport ?=> Unit = {}) extends CompositeComponent[HT
 }
 
 object Viewport {
+
+  def viewport(init: Viewport ?=> Unit = {}): Viewport =
+    CompositeComponent.composite(new Viewport(init))
 
   val windows: ListProperty[WindowConf] = ListProperty()
   val notifications: ListProperty[NotificationConf] = ListProperty()
@@ -238,6 +244,7 @@ object Viewport {
 
   def closeWindowById(id: String): Unit =
     windows.find(_.id == id).foreach(windows -= _)
+
 }
 
 private final class ViewportOverlay(conf: Viewport.OverlayConf) extends CompositeComponent[HTMLDivElement] {

@@ -131,3 +131,42 @@ final class Drawer(slot: Drawer ?=> Unit = {}) extends CompositeComponent[HTMLDi
   }
 
 }
+
+object Drawer {
+
+  def drawer(init: Drawer ?=> Unit = {}): Drawer =
+    CompositeComponent.composite(new Drawer(init))
+
+  def drawerNavigation(init: => Unit)(using drawer: Drawer): Unit =
+    drawer.navigation(init)
+
+  def drawerContent(init: => Unit)(using drawer: Drawer): Unit =
+    drawer.content(init)
+
+  def drawerOpen(using drawer: Drawer): Boolean =
+    drawer.isOpen
+
+  def drawerOpen_=(value: Boolean)(using drawer: Drawer): Unit =
+    drawer.isOpen = value
+
+  def drawerWidth(using drawer: Drawer): String =
+    drawer.width
+
+  def drawerWidth_=(value: String)(using drawer: Drawer): Unit =
+    drawer.width = value
+
+  def closeOnScrimClick(using drawer: Drawer): Boolean =
+    drawer.closeOnScrimClick
+
+  def closeOnScrimClick_=(value: Boolean)(using drawer: Drawer): Unit =
+    drawer.closeOnScrimClick = value
+
+  def openDrawer(using drawer: Drawer): Unit =
+    drawer.open()
+
+  def closeDrawer(using drawer: Drawer): Unit =
+    drawer.close()
+
+  def toggleDrawer(using drawer: Drawer): Unit =
+    drawer.toggle()
+}
