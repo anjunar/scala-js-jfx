@@ -42,7 +42,7 @@ lazy val commonJsSettings = Seq(
     )
 )
 
-lazy val jfx = (project in file("jfx"))
+lazy val jfx = Project(id = "scala-js-jfx", base = file("jfx"))
   .enablePlugins(ScalaJSPlugin)
   .settings(
     name := "scala-js-jfx",
@@ -55,7 +55,7 @@ lazy val jfx = (project in file("jfx"))
   )
   .settings(commonJsSettings)
 
-lazy val app = (project in file("app"))
+lazy val app = Project(id = "scala-js-jfx-demo", base = file("app"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(jfx)
   .settings(
@@ -64,7 +64,7 @@ lazy val app = (project in file("app"))
   )
   .settings(commonJsSettings)
 
-lazy val root = (project in file("."))
+lazy val root = Project(id = "scala-js-jfx-root", base = file("."))
   .aggregate(jfx, app)
   .settings(
     publish / skip := true
