@@ -33,6 +33,7 @@ object JsonMapper {
   private val JsonTypeAnnotation = "jfx.json.JsonType"
   private val JsonNameAnnotation = "jfx.json.JsonName"
   private val JsonIgnoreAnnotation = "jfx.json.JsonIgnore"
+  private val JsonIgnoreWriteAnnotation = "jfx.json.JsonIgnoreWrite"
   private val TypeField = "@type"
   inline def serialize[M](model: M): Dynamic =
     serialize(model, reflectType[M])
@@ -142,7 +143,7 @@ object JsonMapper {
 
     jsonTypeValue(runtimeDescriptor).foreach(typeName => obj(TypeField) = typeName)
 
-    val properties = serializableProperties(runtimeDescriptor)
+    val properties = writableSerializableProperties(runtimeDescriptor)
     if (isInlineMapShape(runtimeDescriptor, properties)) {
       val property = properties.head
       val accessor = propertyAccessor(runtimeDescriptor, property)
@@ -168,7 +169,7 @@ object JsonMapper {
     val bindings = typeBindings(parentContext.resolve(parentContext.expectedType), resolvedDescriptor)
     val context = JsonContext(resolvedDescriptor, bindings)
     val instance = resolvedDescriptor.requireCreateInstance()
-    val properties = serializableProperties(resolvedDescriptor)
+    val properties = readableSerializableProperties(resolvedDescriptor)
     val jsonObject = asDictionary(value)
 
     if (isInlineMapShape(resolvedDescriptor, properties)) {
@@ -440,7 +441,12 @@ object JsonMapper {
     ).flatten.distinct
   }
 
-  private def serializableProperties(descriptor: ClassDescriptor): Array[PropertyDescriptor] =
+  private def writableSerializableProperties(descriptor: ClassDescriptor): Array[PropertyDescriptor] =
+    descriptor.resolved.properties
+      .filterNot(property => property.hasAnnotation(JsonIgnoreAnnotation) || property.hasAnnotation(JsonIgnoreWriteAnnotation))
+      .filter(isSerializableProperty)
+
+  private def readableSerializableProperties(descriptor: ClassDescriptor): Array[PropertyDescriptor] =
     descriptor.resolved.properties
       .filterNot(_.hasAnnotation(JsonIgnoreAnnotation))
       .filter(isSerializableProperty)
