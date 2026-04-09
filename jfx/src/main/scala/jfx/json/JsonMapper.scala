@@ -35,6 +35,7 @@ object JsonMapper {
   private val JsonIgnoreAnnotation = "jfx.json.JsonIgnore"
   private val JsonIgnoreWriteAnnotation = "jfx.json.JsonIgnoreWrite"
   private val TypeField = "@type"
+  private val IdField = "id"
   inline def serialize[M](model: M): Dynamic =
     serialize(model, reflectType[M])
 
@@ -362,22 +363,35 @@ object JsonMapper {
   private def resolvePolymorphicDescriptor(declaredDescriptor: ClassDescriptor, value: js.Any): Option[ClassDescriptor] = {
     val jsonObject = asDictionary(value)
     val jsonType = jsonObject.get(TypeField).map(_.toString)
-
-    jsonType match {
-      case Some(typeName) =>
-        val candidates = subtypeCandidates(declaredDescriptor)
+    val jsonId = jsonObject.get(IdField).map(_.toString)
+    val candidates = subtypeCandidates(declaredDescriptor)
+    val descriptorById = jsonId.flatMap(id => candidates.find(matchesJsonType(_, id)))
+    val descriptorByType =
+      jsonType.flatMap { typeName =>
         candidates.find(matchesJsonType(_, typeName))
           .orElse {
             ClassDescriptor.maybeForName(typeName)
               .filter(descriptor => descriptor.typeName == declaredDescriptor.typeName || isAssignableTo(descriptor, declaredDescriptor.typeName))
           }
+      }
+
+    if (declaredDescriptor.isAbstract) {
+      descriptorById
+        .orElse(descriptorByType)
+        .orElse {
+          jsonType.map(typeName => throw new IllegalArgumentException(s"Unknown @type '$typeName' for ${declaredDescriptor.typeName}"))
+        }
+        .orElse(throw new IllegalArgumentException(s"Missing @type for abstract type ${declaredDescriptor.typeName}"))
+    } else {
+      jsonType match {
+        case Some(typeName) =>
+          descriptorByType
           .orElse {
             throw new IllegalArgumentException(s"Unknown @type '$typeName' for ${declaredDescriptor.typeName}")
           }
-      case None if declaredDescriptor.isAbstract =>
-        throw new IllegalArgumentException(s"Missing @type for abstract type ${declaredDescriptor.typeName}")
-      case None =>
-        Some(declaredDescriptor.resolved)
+        case None =>
+          Some(declaredDescriptor.resolved)
+      }
     }
   }
 
@@ -414,11 +428,32 @@ object JsonMapper {
       .distinctBy(_.typeName)
 
   private def matchesJsonType(descriptor: ClassDescriptor, jsonType: String): Boolean = {
-    val names = Set(
+    val descriptorNames = Set(
       descriptor.typeName,
       descriptor.simpleName
     ) ++ jsonTypeValue(descriptor).toSet
-    names.contains(jsonType)
+
+    val jsonNames = jsonTypeTokens(jsonType)
+
+    descriptorNames.exists(name => jsonNames.contains(name) || jsonNames.contains(name.trim))
+  }
+
+  private def jsonTypeTokens(value: String): Set[String] = {
+    if (value == null || value.isBlank) {
+      Set.empty
+    } else {
+      val normalized = value.trim
+      val localName =
+        normalized
+          .split("[/#:]")
+          .iterator
+          .filter(_.nonEmpty)
+          .toSeq
+          .lastOption
+          .getOrElse(normalized)
+
+      Set(normalized, localName)
+    }
   }
 
   private def jsonTypeValue(descriptor: ClassDescriptor): Option[String] =

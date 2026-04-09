@@ -1,6 +1,6 @@
 package jfx.json
 
-import jfx.test.{SimpleModel, NestedModel, ParentModel, ListModel, BooleanModel, DoubleModel, OptionModel, MapModel, Item, GenericContainer, TestModelRegistry, TestPost}
+import jfx.test.{SimpleModel, NestedModel, ParentModel, ListModel, BooleanModel, DoubleModel, OptionModel, MapModel, Item, GenericContainer, TestModelRegistry, TestPost, TestApplication, TestDocumentLink, TestCurationLink}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import reflect.macros.ReflectMacros
@@ -354,5 +354,35 @@ class JsonMapperSpec extends AnyFlatSpec with Matchers {
     post.links.size shouldBe 2
     post.links.get(0).rel.get shouldBe "like"
     post.links.get(1).rel.get shouldBe "send-to-curation"
+  }
+
+  it should "abstrakte Link-Typen bei generischem json-ld @type ueber id aufloesen" in {
+    val mapper = new JsonMapper
+    val firstLink = Dynamic.literal(
+      rel = "document",
+      url = "/document/documents/document/root",
+      method = "POST",
+      id = "document-root"
+    )
+    firstLink.updateDynamic("@type")("https://technologyspeaks.com/ns/Link")
+
+    val secondLink = Dynamic.literal(
+      rel = "curation",
+      url = "/curation/space",
+      method = "GET",
+      id = "curation-space"
+    )
+    secondLink.updateDynamic("@type")("https://technologyspeaks.com/ns/Link")
+
+    val json = Dynamic.literal()
+    json.updateDynamic("$links")(js.Array(firstLink, secondLink))
+
+    val app = mapper.deserialize[TestApplication](json, ReflectMacros.reflectType[TestApplication])
+
+    app.links.size shouldBe 2
+    app.links.get(0) shouldBe a[TestDocumentLink]
+    app.links.get(1) shouldBe a[TestCurationLink]
+    app.links.get(0).rel.get shouldBe "document"
+    app.links.get(1).rel.get shouldBe "curation"
   }
 }

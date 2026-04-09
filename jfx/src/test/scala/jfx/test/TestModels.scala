@@ -1,7 +1,7 @@
 package jfx.test
 
 import jfx.core.state.{ListProperty, Property}
-import jfx.json.JsonName
+import jfx.json.{JsonName, JsonType}
 import reflect.ReflectRegistry
 
 class SimpleModel {
@@ -82,6 +82,23 @@ class TestPost extends TestJsonEntity {
   val title: Property[String] = Property("")
 }
 
+abstract class TestAbstractLink {
+  val rel: Property[String] = Property("")
+  val url: Property[String] = Property("")
+  val method: Property[String] = Property("")
+}
+
+@JsonType("document-root")
+class TestDocumentLink extends TestAbstractLink
+
+@JsonType("curation-space")
+class TestCurationLink extends TestAbstractLink
+
+class TestApplication {
+  @JsonName("$links")
+  val links: ListProperty[TestAbstractLink] = ListProperty()
+}
+
 object TestModelRegistry {
   println("=== Registering Test Models ===")
   val simpleDesc = ReflectRegistry.register(() => new SimpleModel())
@@ -105,6 +122,9 @@ object TestModelRegistry {
   ReflectRegistry.register(() => new Table[Data[User]]())
   ReflectRegistry.register(() => new TestJsonLink())
   ReflectRegistry.register(() => new TestPost())
+  ReflectRegistry.register(() => new TestDocumentLink())
+  ReflectRegistry.register(() => new TestCurationLink())
+  ReflectRegistry.register(() => new TestApplication())
 
   println("=== Done Registering ===")
 }

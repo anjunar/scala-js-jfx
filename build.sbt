@@ -1,7 +1,7 @@
 import org.scalajs.linker.interface.{ESVersion, ModuleKind}
 import org.scalajs.sbtplugin.ScalaJSPlugin
 
-ThisBuild / version := "1.0.1"
+ThisBuild / version := "1.0.2-SNAPSHOT"
 ThisBuild / organization := "com.anjunar"
 ThisBuild / organizationName := "Anjunar"
 ThisBuild / organizationHomepage := Some(url("https://github.com/anjunar"))
@@ -50,7 +50,8 @@ lazy val jfx = (project in file("jfx"))
     Compile / doc / sources := Seq.empty,
     libraryDependencies += "com.anjunar" %%% "scala-reflect" % "1.0.0",
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1",
-    libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
+    libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13),
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.19" % Test
   )
   .settings(commonJsSettings)
 

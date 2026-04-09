@@ -46,6 +46,8 @@ class Editor(val name: String, override val standalone: Boolean = false)
   private var editorDomCleanup: (() => Unit) | Null = null
 
   var onInternalDocumentLinkNavigate: js.Function1[String, Unit] | Null = null
+  var decodeValue: js.Function1[js.Any, js.Any] | Null = null
+  var encodeValue: js.Function1[js.Any, js.Any] | Null = null
 
   addDisposable(valueProperty.observe(syncExternalValue))
   addDisposable(editableProperty.observe(_ => refreshMode()))
@@ -217,7 +219,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
               notifyPluginsStateUpdated()
 
               if (tr.docChanged) {
-                val next = serializeDoc(newState.doc)
+                val next = encodeExternalValue(serializeDoc(newState.doc))
                 lastSeenValue = next
                 dirtyProperty.set(true)
                 valueProperty.set(next)
@@ -234,7 +236,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
     bindPlugins(view)
 
     if (initialValue == null) {
-      val next = serializeDoc(view.state.doc)
+      val next = encodeExternalValue(serializeDoc(view.state.doc))
       lastSeenValue = next
       valueProperty.set(next)
     }
@@ -290,7 +292,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
       }
 
       if (editorSchema != null) {
-        val doc = parseDoc(editorSchema.nn, value)
+        val doc = parseDoc(editorSchema.nn, decodeExternalValue(value))
         editorView.nn.updateState(
           EditorState.create(
             stateConfig(
@@ -392,7 +394,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
   private def renderInto(mount: HTMLDivElement, value: js.Any | Null): Unit = {
     val schema = ensureSchema()
-    val doc = parseDoc(schema, value)
+    val doc = parseDoc(schema, decodeExternalValue(value))
 
     clearDom(mount)
 
@@ -421,6 +423,24 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
   private def sameValue(left: js.Any | Null, right: js.Any | Null): Boolean =
     js.special.strictEquals(left.asInstanceOf[js.Any], right.asInstanceOf[js.Any])
+
+  private def decodeExternalValue(value: js.Any | Null): js.Any | Null =
+    if (value == null || js.isUndefined(value.asInstanceOf[js.Any])) {
+      value
+    } else if (decodeValue == null) {
+      value
+    } else {
+      decodeValue.nn.apply(value.asInstanceOf[js.Any]).asInstanceOf[js.Any | Null]
+    }
+
+  private def encodeExternalValue(value: js.Any | Null): js.Any | Null =
+    if (value == null || js.isUndefined(value.asInstanceOf[js.Any])) {
+      value
+    } else if (encodeValue == null) {
+      value
+    } else {
+      encodeValue.nn.apply(value.asInstanceOf[js.Any]).asInstanceOf[js.Any | Null]
+    }
 
   private def handleInternalDocumentLink(event: Event): Unit = {
     val mouseEvent = event.asInstanceOf[MouseEvent]
