@@ -12,6 +12,7 @@ object DomainRegistry {
     loader.register(() => new Address(), classOf[Address])
     loader.register(() => new Email(), classOf[Email])
     loader.register(() => new Person(), classOf[Person])
+    loader.register(() => new InsightRecord(), classOf[InsightRecord])
 
     loader.register(() => new Media(), classOf[Media])
     loader.register(() => new Thumbnail(), classOf[Thumbnail])
