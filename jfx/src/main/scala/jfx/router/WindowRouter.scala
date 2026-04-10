@@ -44,7 +44,8 @@ final class WindowRouter(val routes: js.Array[Route])
     given Scope = injectedScope
       .nn
 
-    val routerState = RouteMatcher.resolveRoutes(routes, window.location.pathname).copy(
+    val relPath = Router.toRelativePath(window.location.pathname)
+    val routerState = RouteMatcher.resolveRoutes(routes, relPath).copy(
       search = window.location.search,
       queryParams = parseQueryParams(window.location.search)
     )
@@ -119,11 +120,13 @@ final class WindowRouter(val routes: js.Array[Route])
     }
   }
 
-  private def syncBrowserUrl(url: String): Unit =
-    if (s"${window.location.pathname}${window.location.search}" != url) {
-      window.history.pushState(null, "", url)
+  private def syncBrowserUrl(url: String): Unit = {
+    val fullUrl = Router.toFullPath(url)
+    if (s"${window.location.pathname}${window.location.search}" != fullUrl) {
+      window.history.pushState(null, "", fullUrl)
       window.dispatchEvent(new Event("popstate"))
     }
+  }
 
   private def cloneParams(source: js.Map[String, String]): js.Map[String, String] = {
     val copy = js.Map.empty[String, String]

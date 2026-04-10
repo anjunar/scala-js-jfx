@@ -3,13 +3,14 @@ package jfx.control
 import jfx.core.component.ManagedElementComponent
 import jfx.core.state.Disposable
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
+import jfx.router.Router
 import org.scalajs.dom.{Event, HTMLAnchorElement, window}
 
 class Link(initialHref: String) extends ManagedElementComponent[HTMLAnchorElement] {
 
   override val element: HTMLAnchorElement = {
     val anchor = newElement("a")
-    anchor.href = initialHref
+    anchor.href = Router.toFullPath(initialHref)
     anchor
   }
 
@@ -28,7 +29,7 @@ class Link(initialHref: String) extends ManagedElementComponent[HTMLAnchorElemen
   def href_=(value: String): Unit =
     element.href =
       if (value == null) ""
-      else value
+      else Router.toFullPath(value)
 }
 
 object Link {

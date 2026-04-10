@@ -60,6 +60,12 @@ class Router(val routes: js.Array[Route], private val scope: Scope) extends Node
   def isMatched: Boolean =
     state.isMatched
 
+  private def currentBrowserUrl(): String = {
+    val fullPath = window.location.pathname
+    val relPath = Router.toRelativePath(fullPath)
+    s"$relPath${window.location.search}"
+  }
+
   def navigate(path: String): Unit =
     navigate(path, replace = false)
 
@@ -71,11 +77,13 @@ class Router(val routes: js.Array[Route], private val scope: Scope) extends Node
 
     val nextState = resolve(path)
     val currentState = stateProperty.get
-    val browserUrl = currentBrowserUrl()
 
-    if (browserUrl != nextState.url) {
-      if (replace) window.history.replaceState(null, "", nextState.url)
-      else window.history.pushState(null, "", nextState.url)
+    val fullNextUrl = Router.toFullPath(nextState.url)
+    val currentFullUrl = Router.toFullPath(currentBrowserUrl())
+
+    if (currentFullUrl != fullNextUrl) {
+      if (replace) window.history.replaceState(null, "", fullNextUrl)
+      else window.history.pushState(null, "", fullNextUrl)
     }
 
     if (!sameState(currentState, nextState)) {
@@ -191,9 +199,6 @@ class Router(val routes: js.Array[Route], private val scope: Scope) extends Node
           search = search
         )
     }
-
-  private def currentBrowserUrl(): String =
-    s"${window.location.pathname}${window.location.search}"
 
   private def sameState(left: RouterState, right: RouterState): Boolean =
     left.path == right.path &&
@@ -319,4 +324,37 @@ object Router {
 
   def reload(using router: Router): Unit =
     router.reload()
+
+  lazy val basePath: String = {
+    val baseElements = org.scalajs.dom.document.getElementsByTagName("base")
+    if (baseElements.length > 0) {
+      val href = baseElements.item(0).asInstanceOf[org.scalajs.dom.HTMLBaseElement].href
+      try {
+        val url = new org.scalajs.dom.URL(href)
+        val path = url.pathname
+        if (path == "/" || path.isEmpty) ""
+        else if (path.endsWith("/")) path.dropRight(1)
+        else path
+      } catch {
+        case _: Throwable => ""
+      }
+    } else ""
+  }
+
+  def toFullPath(path: String): String = {
+    if (basePath.isEmpty) path
+    else if (path.startsWith(basePath)) path
+    else {
+      val normalized = if (path.startsWith("/")) path else "/" + path
+      basePath + normalized
+    }
+  }
+
+  def toRelativePath(path: String): String = {
+    if (basePath.isEmpty) path
+    else if (path.startsWith(basePath)) {
+      val rel = path.substring(basePath.length)
+      if (rel.isEmpty) "/" else if (rel.startsWith("/")) rel else "/" + rel
+    } else path
+  }
 }
