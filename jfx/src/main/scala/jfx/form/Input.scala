@@ -58,7 +58,15 @@ class Input(val name: String, override val standalone: Boolean = false) extends 
     element.readOnly = value
 
   def onClick(listener: Event => Unit): Unit =
-    element.onclick = listener
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      element.onclick = event =>
+        DslRuntime.withScope(currentScope) {
+          DslRuntime.withComponentContext(currentContext) {
+            listener(event)
+          }
+        }
+    }
 
   private def applyElementValue(value: String | Boolean | Double): Unit =
     element.`type` match {

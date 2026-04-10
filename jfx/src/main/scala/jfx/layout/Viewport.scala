@@ -105,9 +105,14 @@ object Viewport {
     content: Scope ?=> NodeComponent[? <: Node] | Null
   ): () => NodeComponent[? <: Node] | Null =
     DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
       () => {
-        given Scope = currentScope
-        content
+        DslRuntime.withScope(currentScope) {
+          DslRuntime.withComponentContext(ComponentContext(None, currentContext.enclosingForm)) {
+            given Scope = currentScope
+            content
+          }
+        }
       }
     }
 
