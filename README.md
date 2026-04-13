@@ -87,7 +87,7 @@ lazy val jfx = (project in file("jfx"))
 Add the library to a Scala.js project:
 
 ```scala
-libraryDependencies += "com.anjunar" %%% "scala-js-jfx" % "1.0.0"
+libraryDependencies += "com.anjunar" %%% "scala-js-jfx" % "1.0.5"
 ```
 
 The current build uses:
