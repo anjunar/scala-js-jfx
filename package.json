@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:ssr": "node server/ssr-dev-server.mjs",
     "build": "vite build && node scripts/generate-static-routes.mjs",
     "build:ssr": "vite build --ssr && vite build",
     "preview": "vite preview"
