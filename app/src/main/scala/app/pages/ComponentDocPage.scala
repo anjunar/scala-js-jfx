@@ -12,8 +12,11 @@ import jfx.core.component.ElementComponent.*
 import jfx.core.state.ListProperty
 import jfx.core.state.Property
 import jfx.dsl.*
-import jfx.dsl.Scope.inject
+import jfx.dsl.Scope.{inject, scope, scoped}
 import jfx.form.ComboBox.{comboBox, comboItem, comboItemSelected, comboRenderedSelectedItem, items, itemRenderer, valueRenderer}
+import jfx.form.Editor.editor
+import jfx.form.Form.{form, onSubmit, onSubmit_=}
+import jfx.form.editor.plugins.{basePlugin, headingPlugin, linkPlugin, listPlugin}
 import jfx.form.ImageCropper.*
 import jfx.form.Input.input
 import jfx.form.InputContainer.inputContainer
@@ -34,6 +37,10 @@ import scala.util.control.NonFatal
 class ComponentDocPage(entry: DocEntry) extends CompositeComponent[HTMLDivElement] {
 
   private final case class DocQuery(filter: String = "", sort: Seq[String] = Seq.empty, offset: Int = 0, size: Int = 3)
+  private final class DocFormModel(
+    var title: Property[String] = Property("A calm editor note"),
+    var body: Property[String] = Property("Keep the live form close to the explanation.")
+  )
 
   override val element: HTMLDivElement = newElement("div")
   private given ExecutionContext = ExecutionContext.global
@@ -267,9 +274,25 @@ class ComponentDocPage(entry: DocEntry) extends CompositeComponent[HTMLDivElemen
           "Submission",
           "Submission can serialize the current model or call a backend action."
         )
+        renderFormLiveDemo()
         docsActionRow("Go deeper into related form controls without leaving the docs section.")(
           "InputContainer Docs" -> (() => inject[Router].navigate("/docs/input-container")),
           "ComboBox Docs" -> (() => inject[Router].navigate("/docs/combo-box"))
+        )
+
+      case "editor" =>
+        docsPreviewGrid(
+          "Rich text",
+          "The editor keeps toolbar state, structured content and document updates in one runtime surface.",
+          "Plugin-based",
+          "Base formatting, headings and lists can be added incrementally without changing the surrounding page.",
+          "Docs fit",
+          "The same control belongs in form workflows, content tools and inspection screens."
+        )
+        renderEditorLiveDemo()
+        docsActionRow("Use the editor when the content surface itself should feel like part of the product.")(
+          "Form Docs" -> (() => inject[Router].navigate("/docs/form")),
+          "Viewport Docs" -> (() => inject[Router].navigate("/docs/viewport"))
         )
 
       case "input-container" =>
@@ -517,6 +540,71 @@ class ComponentDocPage(entry: DocEntry) extends CompositeComponent[HTMLDivElemen
       }
     }
 
+  private def renderFormLiveDemo()(using CompositeComponent.DslContext): Unit =
+    scope {
+      scoped[DocFormModel] {
+        new DocFormModel()
+      }
+
+      div {
+        classes = "component-doc__panel"
+
+        div {
+          classes = "component-doc__panel-title"
+          text = "Live Form"
+        }
+
+        div {
+          classes = "component-doc__hint"
+          text = "A small typed form stays close to the explanation and still behaves like a real editing surface."
+        }
+
+        form(inject[DocFormModel]) {
+          onSubmit = _ => ()
+          classes = "component-doc__mini-form"
+
+          inputContainer("Title") {
+            input("title")
+          }
+
+          inputContainer("Summary") {
+            input("body")
+          }
+
+          button("Save draft") {
+            classes = Seq("calm-action", "calm-action--quiet")
+          }
+        }
+      }
+    }
+
+  private def renderEditorLiveDemo()(using CompositeComponent.DslContext): Unit =
+    div {
+      classes = "component-doc__panel"
+
+      div {
+        classes = "component-doc__panel-title"
+        text = "Live Editor"
+      }
+
+      div {
+        classes = "component-doc__hint"
+        text = "This editor starts with a short note and the toolbar plugins that matter most in the docs: headings, lists and links."
+      }
+
+      editor("docs-editor") {
+        val currentEditor = summon[jfx.form.Editor]
+        currentEditor.valueProperty.set(
+          """{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Keep the editor close to the page.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Use headings, lists and links without changing the surrounding shell.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}"""
+        )
+
+        basePlugin()
+        headingPlugin()
+        listPlugin()
+        linkPlugin()
+      }
+    }
+
   private def renderStaticTableDemo(): Unit = {
     val people = ListProperty(js.Array(samplePeople().take(4)*))
 
@@ -709,6 +797,7 @@ class ComponentDocPage(entry: DocEntry) extends CompositeComponent[HTMLDivElemen
       case "router" => "/"
       case "table-view" | "remote-list-property" => "/table"
       case "form" | "input-container" | "combo-box" | "image-cropper" => "/form"
+      case "editor" => "/docs/editor"
       case "viewport" => "/window"
       case _ => "/docs"
     }

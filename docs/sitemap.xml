@@ -73,6 +73,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://anjunar.github.io/scala-js-jfx/docs/editor/</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://anjunar.github.io/scala-js-jfx/docs/viewport/</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>

@@ -342,7 +342,16 @@ class Editor(val name: String, override val standalone: Boolean = false)
     Seq.empty
 
   private def collectNodes(): Seq[js.Any] =
-    pluginComponents.iterator.flatMap(_.nodes).toSeq
+    (
+      Seq(
+        LexicalRichText.HeadingNode,
+        LexicalRichText.QuoteNode,
+        LexicalList.ListNode,
+        LexicalList.ListItemNode,
+        LexicalLink.LinkNode,
+        LexicalCode.CodeNode
+      ) ++ pluginComponents.iterator.flatMap(_.nodes).toSeq
+    ).distinct
 
   private def collectFloatingToolbarModules(): Seq[EditorModule] = {
     val modules = mutable.ArrayBuffer.empty[EditorModule]

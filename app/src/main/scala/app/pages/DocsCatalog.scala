@@ -307,6 +307,40 @@ object DocsCatalog {
       )
     ),
     DocEntry(
+      slug = "editor",
+      category = "Forms",
+      name = "Editor",
+      packageName = "jfx.form.Editor",
+      tagline = "Rich content editing inside the same form runtime.",
+      summary = "The editor keeps structured writing, toolbar state and plugin modules inside one composable control.",
+      bullets = Vector(
+        "Built on Lexical, but wrapped in the same DSL as the rest of the app.",
+        "Supports toolbar modules for headings, lists, links and additional plugins.",
+        "A strong fit for product copy, CMS content and internal docs editors."
+      ),
+      importCode =
+        """import jfx.form.Editor.editor
+          |import jfx.form.editor.plugins.{basePlugin, headingPlugin, linkPlugin, listPlugin}""".stripMargin,
+      usageCode =
+        """editor("article") {
+          |  basePlugin()
+          |  headingPlugin()
+          |  listPlugin()
+          |  linkPlugin()
+          |}""".stripMargin,
+      patterns = Vector(
+        "Content Authoring" -> "Use it when the user needs a structured writing surface rather than a plain textarea.",
+        "Form Adjacent" -> "Keep the editor inside a larger model-editing flow without switching to another framework.",
+        "Extensible Tooling" -> "Add plugins as the product grows without rewriting the editor shell."
+      ),
+      apiPoints = Vector(
+        "editor(name) { ... }" -> "Create a rich editor control.",
+        "basePlugin()" -> "Add core formatting controls like undo, redo, bold and italic.",
+        "headingPlugin()" -> "Enable heading levels in the editor.",
+        "listPlugin()" -> "Add bullet and numbered list support."
+      )
+    ),
+    DocEntry(
       slug = "viewport",
       category = "Layout",
       name = "Viewport",

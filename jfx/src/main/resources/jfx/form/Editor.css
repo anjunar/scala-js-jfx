@@ -4,6 +4,140 @@
 .editor {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.editor .lexical-ribbon-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--color-surface-base);
+    border: 1px solid var(--color-editor-border);
+    border-radius: 6px;
+    overflow: hidden;
+    color: var(--color-editor-text);
+}
+
+.editor .lexical-ribbon-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 8px 10px 0;
+    background: var(--color-background-secondary);
+    flex-wrap: wrap;
+}
+
+.editor .lexical-ribbon-tab {
+    padding: 6px 10px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-weight: 600;
+    color: var(--color-editor-text-strong);
+}
+
+.editor .lexical-ribbon-tab.active {
+    border-bottom-color: var(--color-accent);
+    background: var(--color-surface-base);
+}
+
+.editor .lexical-ribbon-content {
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+    min-height: 72px;
+    flex-wrap: wrap;
+}
+
+.editor .lexical-ribbon-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 10px 0 0;
+    border-right: 1px solid var(--color-editor-rule);
+    flex-shrink: 0;
+}
+
+.editor .lexical-ribbon-section:last-child {
+    border-right: none;
+    padding-right: 0;
+}
+
+.editor .lexical-ribbon-buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+}
+
+.editor .lexical-ribbon-section-label {
+    font-size: 10px;
+    letter-spacing: 0;
+    color: var(--color-editor-text);
+    text-transform: uppercase;
+    user-select: none;
+    cursor: pointer;
+    border-top: 1px solid var(--color-editor-rule);
+    padding-top: 4px;
+    text-align: center;
+}
+
+.editor .lexical-ribbon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 30px;
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-editor-text-strong);
+    cursor: pointer;
+    font: inherit;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.editor .lexical-ribbon-button:hover {
+    background: var(--color-editor-hover);
+    border-color: var(--color-editor-border);
+}
+
+.editor .lexical-ribbon-button.active {
+    background: var(--color-editor-active);
+    border-color: var(--color-editor-border);
+    color: var(--color-black);
+}
+
+.editor .lexical-dropdown-wrapper {
+    position: relative;
+}
+
+.editor .lexical-dropdown-menu {
+    position: fixed;
+    z-index: 3000;
+    min-width: 180px;
+    margin-top: 4px;
+    border: 1px solid var(--color-editor-border);
+    border-radius: 6px;
+    background: var(--color-surface-base);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+    overflow: hidden;
+}
+
+.editor .lexical-dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: var(--color-editor-text-strong);
+}
+
+.editor .lexical-dropdown-item:hover {
+    background: var(--color-editor-hover);
 }
 
 .ProseMirror {
