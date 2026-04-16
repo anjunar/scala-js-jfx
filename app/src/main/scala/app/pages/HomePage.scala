@@ -2,6 +2,7 @@ package app.pages
 
 import app.{ShowcaseCatalog, ShowcaseRoute}
 import jfx.action.Button.{button, onClick}
+import jfx.control.Image.{alt, image, src}
 import jfx.core.component.CompositeComponent
 import jfx.core.component.CompositeComponent.composite
 import jfx.core.component.ElementComponent.*
@@ -25,233 +26,319 @@ class HomePage extends CompositeComponent[HTMLDivElement] {
       style {
         display = "flex"
         flexDirection = "column"
-        gap = "20px"
-        maxWidth = "1180px"
+        gap = "28px"
+        maxWidth = "1240px"
         margin = "0 auto"
       }
 
       div {
-        classes = "clarity-hero clarity-hero--manifest"
+        classes = "home-hero"
 
-        div {
-          classes = "clarity-hero__eyebrow"
-          text = "Start here"
+        image {
+          classes = "home-hero__image"
+          src = "/scala-js-jfx/og-image.svg"
+          alt = ""
         }
 
         div {
-          classes = "clarity-hero__title"
-          text = "One framework. Four clear examples."
+          classes = "home-hero__content"
+
+          div {
+            classes = "home-eyebrow"
+            text = "Scala.js UI architecture"
+          }
+
+          div {
+            classes = "home-hero__title"
+            text = "Typed browser apps that keep their shape as they grow."
+          }
+
+          div {
+            classes = "home-hero__copy"
+            text =
+              "scala-js-jfx brings a JavaFX-inspired component model to Scala.js: routed pages, typed form state, remote data views, secondary windows and live reference material all follow one composable DSL."
+          }
+
+          hbox {
+            classes = "clarity-action-row home-hero__actions"
+
+            button("Start with forms") {
+              classes = Seq("calm-action", "calm-action--primary")
+              onClick { _ =>
+                inject[Router].navigate("/form")
+              }
+            }
+
+            button("See the data flow") {
+              classes = Seq("calm-action", "calm-action--secondary")
+              onClick { _ =>
+                inject[Router].navigate("/table")
+              }
+            }
+
+            button("Open reference") {
+              classes = Seq("calm-action", "calm-action--quiet")
+              onClick { _ =>
+                inject[Router].navigate("/docs")
+              }
+            }
+          }
         }
 
         div {
-          classes = "clarity-hero__copy"
-          text =
-            "Use the navigation to jump straight to forms, tables, windows or component docs. Each page focuses on one idea."
-        }
+          classes = "home-hero__metrics"
 
-        hbox {
-          classes = "clarity-action-row"
-
-          button("Open forms") {
-            classes = Seq("calm-action", "calm-action--primary")
-            onClick { _ =>
-              inject[Router].navigate("/form")
-            }
-          }
-
-          button("Open data table") {
-            classes = Seq("calm-action", "calm-action--secondary")
-            onClick { _ =>
-              inject[Router].navigate("/table")
-            }
-          }
-
-          button("Open docs") {
-            classes = Seq("calm-action", "calm-action--quiet")
-            onClick { _ =>
-              inject[Router].navigate("/docs")
-            }
-          }
+          metric("01", "One component model", "Pages, forms, lists and overlays are built with the same primitives.")
+          metric("02", "Typed state flow", "Inputs and data views stay close to Scala models instead of DOM glue.")
+          metric("03", "Guided demos", "Each workspace answers a concrete architecture question.")
         }
       }
 
       div {
-        classes = "clarity-zone"
+        classes = "home-section home-section--intro"
 
-        zoneHeading(
-          label = "What this demo shows",
-          title = "The app is organized by use case, not by abstract ideas.",
-          copy = "You can move directly to the area you care about without reading the whole story first."
-        )
-
-        principleCard(
-          title = "Forms",
-          body = "Typed inputs, nested subforms, media editing and revision history."
-        )
-
-        principleCard(
-          title = "Tables",
-          body = "Filtering, sorting, loading and record selection with realistic data."
-        )
-
-        principleCard(
-          title = "Windows and docs",
-          body = "Secondary surfaces, notifications and a searchable reference section with live examples."
-        )
-      }
-
-      div {
-        classes = "clarity-zone"
-
-        zoneHeading(
-          label = "Pages",
-          title = "Choose the example that matches your question.",
-          copy = "Every page is intentionally focused so the framework feels easier to understand."
+        sectionHeading(
+          label = "Architecture",
+          title = "A small set of primitives carries the whole application.",
+          copy = "The project is easiest to understand as a chain: routing creates the workspace, components own precise state, data surfaces react to changes, and the viewport keeps secondary work in context."
         )
 
         div {
-          classes = "clarity-route-grid"
+          classes = "home-architecture-flow"
 
-          routeCard(ShowcaseCatalog.formWorkspace)
-          routeCard(ShowcaseCatalog.dataQueue)
-          routeCard(ShowcaseCatalog.windowWorkspace)
-          routeCard(ShowcaseCatalog.referenceAtlas)
+          architectureStep(
+            index = "Route",
+            title = "Choose a workspace",
+            body = "Navigation maps directly to focused pages, so each workflow has a stable entry point."
+          )
+
+          architectureStep(
+            index = "State",
+            title = "Bind typed models",
+            body = "Fields, lists and selections move through Scala values before they touch the DOM."
+          )
+
+          architectureStep(
+            index = "Render",
+            title = "Compose the surface",
+            body = "Reusable components create forms, tables and reference examples from the same DSL."
+          )
+
+          architectureStep(
+            index = "Viewport",
+            title = "Keep context alive",
+            body = "Dialogs, windows and notifications support side tasks without breaking the route."
+          )
         }
       }
 
       div {
-        classes = "clarity-grid clarity-grid--two"
+        classes = "home-section"
+
+        sectionHeading(
+          label = "Value",
+          title = "The benefits are practical: less glue, clearer boundaries, safer UI state.",
+          copy = "scala-js-jfx is useful when a browser app needs real structure without giving up the speed and reach of Scala.js."
+        )
 
         div {
-          classes = "clarity-zone"
+          classes = "home-benefit-grid"
 
-          zoneHeading(
-            label = "Suggested order",
-            title = "A simple way to explore the demo.",
-            copy = "Start with forms, move to tables, then windows, and use the docs as reference."
+          benefitCard(
+            title = "Readable growth",
+            body = "Features can expand from a single component into routed workspaces without switching mental models."
           )
 
-          timelineStep("01", "Forms", "See how typed fields, nested forms and revision history work together.")
-          timelineStep("02", "Data table", "See how the framework handles remote data, filters and selection.")
-          timelineStep("03", "Windows", "See floating windows and notifications for secondary workflows.")
-          timelineStep("04", "Docs", "Use the component docs when you want a concrete API example.")
+          benefitCard(
+            title = "Typed user input",
+            body = "Forms stay close to Scala domain objects, including nested structures and media fields."
+          )
+
+          benefitCard(
+            title = "Honest async surfaces",
+            body = "Loading, filtering, sorting and selection are treated as first-class UI states."
+          )
+
+          benefitCard(
+            title = "Side work without chaos",
+            body = "Windows and notifications make supporting tasks visible while the primary flow remains intact."
+          )
+        }
+      }
+
+      div {
+        classes = "home-section"
+
+        sectionHeading(
+          label = "Guided demos",
+          title = "Open the workspace that matches the question in your head.",
+          copy = "The demos now read as a tour through the architecture instead of isolated raw samples."
+        )
+
+        div {
+          classes = "home-demo-grid"
+
+          demoCard(
+            route = ShowcaseCatalog.formWorkspace,
+            step = "First stop",
+            title = "Model-driven forms",
+            body = "Start here when you want to understand typed fields, nested subforms, validation surfaces, media editing and revision history."
+          )
+
+          demoCard(
+            route = ShowcaseCatalog.dataQueue,
+            step = "Data layer",
+            title = "Remote lists and tables",
+            body = "Use this workspace for loading states, filtering, sorting, row selection and detail panes under realistic pressure."
+          )
+
+          demoCard(
+            route = ShowcaseCatalog.windowWorkspace,
+            step = "Secondary work",
+            title = "Viewport windows",
+            body = "See how supporting tasks, notifications and detachable panes stay connected to the active route."
+          )
+
+          demoCard(
+            route = ShowcaseCatalog.referenceAtlas,
+            step = "Reference",
+            title = "Component patterns",
+            body = "Jump here for import paths, compact usage notes and live examples that match the rest of the app."
+          )
+        }
+      }
+
+      div {
+        classes = "home-section home-section--closing"
+
+        div {
+          classes = "home-closing__copy"
+
+          div {
+            classes = "home-eyebrow"
+            text = "Project purpose"
+          }
+
+          div {
+            classes = "home-closing__title"
+            text = "A precise Scala UI toolkit for applications that need structure before they need spectacle."
+          }
+
+          div {
+            classes = "home-closing__body"
+            text =
+              "The repository is both framework and proof: a compact runtime, a coherent demo app and a living reference that show how Scala.js can carry serious browser interfaces with architectural calm."
+          }
         }
 
-        div {
-          classes = "clarity-zone"
-
-          zoneHeading(
-            label = "Under the hood",
-            title = "The same runtime powers every page.",
-            copy = "Routing, render blocks, typed state and the viewport system all come from the same framework primitives."
-          )
-
-          principleCard(
-            title = "Route-aware shell",
-            body = "The header and navigation react directly to the active route."
-          )
-
-          principleCard(
-            title = "Reusable rendering",
-            body = "Lists, detail panes and docs use the same component and state model."
-          )
-
-          principleCard(
-            title = "Live reference",
-            body = "The docs stay practical because they include running examples."
-          )
+        button("Explore the reference") {
+          classes = Seq("calm-action", "calm-action--primary")
+          onClick { _ =>
+            inject[Router].navigate("/docs")
+          }
         }
       }
     }
 
-  private def zoneHeading(label: String, title: String, copy: String): Unit =
+  private def sectionHeading(label: String, title: String, copy: String): Unit =
     div {
-      classes = "clarity-zone-heading"
+      classes = "home-section-heading"
 
       div {
-        classes = "clarity-zone-heading__label"
+        classes = "home-eyebrow"
         text = label
       }
 
       div {
-        classes = "clarity-zone-heading__title"
+        classes = "home-section-heading__title"
         text = title
       }
 
       div {
-        classes = "clarity-zone-heading__copy"
+        classes = "home-section-heading__copy"
         text = copy
       }
     }
 
-  private def principleCard(title: String, body: String): Unit =
+  private def metric(index: String, title: String, body: String): Unit =
     div {
-      classes = "clarity-principle-card"
+      classes = "home-metric"
 
       div {
-        classes = "clarity-principle-card__title"
-        text = title
-      }
-
-      div {
-        classes = "clarity-principle-card__copy"
-        text = body
-      }
-    }
-
-  private def routeCard(route: ShowcaseRoute)(using CompositeComponent.DslContext): Unit =
-    div {
-      classes = "clarity-route-card"
-
-      div {
-        classes = "clarity-route-card__meta"
-
-        div {
-          classes = "clarity-route-card__zone"
-          text = route.zone
-        }
-      }
-
-      div {
-        classes = "clarity-route-card__title"
-        text = route.title
-      }
-
-      div {
-        classes = "clarity-route-card__copy"
-        text = route.summary
-      }
-
-      div {
-        classes = "clarity-route-card__note"
-        text = route.note
-      }
-
-      button("Open page") {
-        classes = Seq("calm-action", "calm-action--quiet")
-        onClick { _ =>
-          inject[Router].navigate(route.path)
-        }
-      }
-    }
-
-  private def timelineStep(index: String, title: String, body: String): Unit =
-    div {
-      classes = "clarity-timeline-step"
-
-      div {
-        classes = "clarity-timeline-step__index"
+        classes = "home-metric__index"
         text = index
       }
 
       div {
-        classes = "clarity-timeline-step__title"
+        classes = "home-metric__title"
         text = title
       }
 
       div {
-        classes = "clarity-timeline-step__copy"
+        classes = "home-metric__body"
         text = body
+      }
+    }
+
+  private def architectureStep(index: String, title: String, body: String): Unit =
+    div {
+      classes = "home-architecture-step"
+
+      div {
+        classes = "home-architecture-step__index"
+        text = index
+      }
+
+      div {
+        classes = "home-architecture-step__title"
+        text = title
+      }
+
+      div {
+        classes = "home-architecture-step__body"
+        text = body
+      }
+    }
+
+  private def benefitCard(title: String, body: String): Unit =
+    div {
+      classes = "home-benefit-card"
+
+      div {
+        classes = "home-benefit-card__title"
+        text = title
+      }
+
+      div {
+        classes = "home-benefit-card__body"
+        text = body
+      }
+    }
+
+  private def demoCard(route: ShowcaseRoute, step: String, title: String, body: String)(using CompositeComponent.DslContext): Unit =
+    div {
+      classes = "home-demo-card"
+
+      div {
+        classes = "home-demo-card__meta"
+        text = step
+      }
+
+      div {
+        classes = "home-demo-card__title"
+        text = title
+      }
+
+      div {
+        classes = "home-demo-card__body"
+        text = body
+      }
+
+      button("Open " + route.title) {
+        classes = Seq("calm-action", "calm-action--secondary")
+        onClick { _ =>
+          inject[Router].navigate(route.path)
+        }
       }
     }
 }
