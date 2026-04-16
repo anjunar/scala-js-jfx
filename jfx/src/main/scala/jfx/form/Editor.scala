@@ -4,8 +4,8 @@ import jfx.core.component.{ManagedElementComponent, NodeComponent}
 import jfx.core.state.Property
 import jfx.dsl.*
 import jfx.form.editor.plugins.EditorPlugin
-import jfx.form.editor.prosemirror.*
 import jfx.layout.{Div, HBox, HorizontalLine, VBox}
+import lexical.*
 import org.scalajs.dom.{Element, Event, HTMLDivElement, HTMLElement, MouseEvent, Node, window}
 
 import scala.collection.mutable
@@ -24,9 +24,9 @@ class Editor(val name: String, override val standalone: Boolean = false)
     divElement
   }
 
-
   private val pluginComponents = mutable.ArrayBuffer.empty[EditorPlugin]
   private val auxiliaryComponents = mutable.ArrayBuffer.empty[NodeComponent[? <: Node]]
+  private val editorRegistrations = mutable.ArrayBuffer.empty[js.Function0[Unit]]
 
   private var capturedScope: Scope = Scope.root()
   private var structureInitialized = false
@@ -37,12 +37,10 @@ class Editor(val name: String, override val standalone: Boolean = false)
   private var separator: HorizontalLine | Null = null
   private var contentHost: Div | Null = null
 
-  private var editorSchema: Schema | Null = null
-  private var editorPlugins: js.Array[Plugin[js.Any]] = js.Array()
-  private var editorView: EditorView | Null = null
-  private var domSerializer: DOMSerializer | Null = null
+  private var lexicalEditor: LexicalEditor | Null = null
   private var readOnlyMount: HTMLDivElement | Null = null
   private var lastSeenValue: js.Any | Null = null
+  private var lastSeenStateJson: String | Null = null
   private var editorDomCleanup: (() => Unit) | Null = null
 
   var onInternalDocumentLinkNavigate: js.Function1[String, Unit] | Null = null
@@ -67,13 +65,8 @@ class Editor(val name: String, override val standalone: Boolean = false)
     child match {
       case plugin: EditorPlugin =>
         pluginComponents += plugin
-        invalidateSchema()
-
-        if (structureInitialized && pluginHost != null && child.parent.isEmpty) {
-          pluginHost.nn.attachChild(plugin.asInstanceOf[NodeComponent[? <: Node]])
-          if (editableProperty.get) {
-            refreshMode()
-          }
+        if (structureInitialized) {
+          refreshMode()
         }
 
       case other =>
@@ -99,15 +92,15 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
           toolbarBox = HBox.hbox {
             style {
-              alignItems = "center"
+              alignItems = "stretch"
               marginTop = "8px"
+              columnGap = "8px"
             }
 
-            pluginHost = HBox.hbox {}
-
-            Div.div {
+            pluginHost = HBox.hbox {
               style {
                 flex = "1"
+                minWidth = "0px"
               }
             }
 
@@ -119,7 +112,6 @@ class Editor(val name: String, override val standalone: Boolean = false)
               marginTop = "8px"
             }
           }
-
 
           contentHost = Div.div {
             style {
@@ -135,16 +127,6 @@ class Editor(val name: String, override val standalone: Boolean = false)
     }
 
   private def attachBufferedChildren(): Unit = {
-    if (pluginHost != null) {
-      val host = pluginHost.nn
-      pluginComponents.foreach { plugin =>
-        val component = plugin.asInstanceOf[NodeComponent[? <: Node]]
-        if (component.parent.isEmpty) {
-          host.attachChild(component)
-        }
-      }
-    }
-
     if (auxiliaryHost != null) {
       val host = auxiliaryHost.nn
       auxiliaryComponents.foreach { component =>
@@ -155,18 +137,16 @@ class Editor(val name: String, override val standalone: Boolean = false)
     }
   }
 
-  private def invalidateSchema(): Unit = {
-    editorSchema = null
-    domSerializer = null
-  }
-
   private def refreshMode(): Unit = {
     if (!structureInitialized || contentHost == null) {
       return
     }
 
-    setElementVisible(toolbarBox, editableProperty.get)
-    setElementVisible(separator, editableProperty.get)
+    val showToolbar =
+      editableProperty.get && (collectToolbarElements().nonEmpty || auxiliaryComponents.nonEmpty)
+
+    setElementVisible(toolbarBox, showToolbar)
+    setElementVisible(separator, showToolbar)
 
     destroyEditorView()
     clearDom(contentHost.nn.element)
@@ -182,10 +162,220 @@ class Editor(val name: String, override val standalone: Boolean = false)
     val mount = newElement("div")
     mount.style.setProperty("flex", "1")
     mount.style.setProperty("min-height", "0px")
+    mount.style.setProperty("overflow", "auto")
     contentHost.nn.element.appendChild(mount)
 
-    val focusInListener: org.scalajs.dom.Event => Unit = _ => focusedProperty.set(true)
-    val focusOutListener: org.scalajs.dom.Event => Unit = _ => focusedProperty.set(false)
+    registerDomListeners(mount)
+
+    val initialValue = valueProperty.get
+    val initialStateJson = toLexicalJson(initialValue)
+
+    val builder =
+      new LexicalBuilder()
+        .withNamespace(name)
+        .withTheme(defaultTheme())
+        .withEditable(true)
+        .withNodes(js.Array(collectNodes()*))
+        .withModules(collectModules()*)
+
+    initialStateJson.foreach(builder.withInitialState)
+
+    val editor = builder.build(mount)
+    lexicalEditor = editor
+    readOnlyMount = null
+
+    renderToolbar(editor)
+    registerFloatingToolbar(editor)
+    registerPluginInstallers(editor)
+    registerUpdateListener(editor)
+
+    if (initialStateJson.nonEmpty) {
+      lastSeenValue = initialValue
+      lastSeenStateJson = initialStateJson.orNull
+    } else {
+      publishEditorState(editor, markDirty = false)
+    }
+  }
+
+  private def mountReadOnly(): Unit = {
+    val mount = newElement("div")
+    mount.style.setProperty("flex", "1")
+    mount.style.setProperty("min-height", "0px")
+    mount.style.setProperty("overflow", "auto")
+    mount.classList.add("lexical-read-only")
+    contentHost.nn.element.appendChild(mount)
+
+    val linkClickListener: Event => Unit = event => handleInternalDocumentLink(event)
+    mount.addEventListener("click", linkClickListener)
+    editorDomCleanup = () => {
+      mount.removeEventListener("click", linkClickListener)
+    }
+
+    val builder =
+      new LexicalBuilder()
+        .withNamespace(s"$name-readonly")
+        .withTheme(defaultTheme())
+        .withEditable(false)
+        .withNodes(js.Array(collectNodes()*))
+        .withModules(collectReadOnlyModules()*)
+
+    toLexicalJson(valueProperty.get).foreach(builder.withInitialState)
+
+    lexicalEditor = builder.build(mount)
+    readOnlyMount = mount
+    focusedProperty.set(false)
+    lastSeenValue = valueProperty.get
+    lastSeenStateJson = toLexicalJson(valueProperty.get).orNull
+  }
+
+  private def destroyEditorView(): Unit = {
+    readOnlyMount = null
+    focusedProperty.set(false)
+
+    editorRegistrations.foreach { unregister =>
+      try unregister()
+      catch {
+        case _: Throwable => ()
+      }
+    }
+    editorRegistrations.clear()
+
+    if (lexicalEditor != null) {
+      try lexicalEditor.nn.setRootElement(null)
+      catch {
+        case _: Throwable => ()
+      }
+      lexicalEditor = null
+    }
+
+    if (editorDomCleanup != null) {
+      editorDomCleanup.nn.apply()
+      editorDomCleanup = null
+    }
+
+    if (pluginHost != null) {
+      clearDom(pluginHost.nn.element)
+    }
+  }
+
+  private def registerUpdateListener(editor: LexicalEditor): Unit = {
+    val unregister =
+      editor.registerUpdateListener { (_: js.Dynamic) =>
+        publishEditorState(editor, markDirty = true)
+      }
+
+    editorRegistrations += unregister
+  }
+
+  private def registerPluginInstallers(editor: LexicalEditor): Unit =
+    pluginComponents.foreach { plugin =>
+      val unregister = plugin.install(editor)
+      editorRegistrations += unregister
+    }
+
+  private def registerFloatingToolbar(editor: LexicalEditor): Unit = {
+    val modules = collectFloatingToolbarModules()
+    if (modules.nonEmpty) {
+      val unregister = new FloatingToolbarManager(editor, modules).register()
+      editorRegistrations += unregister
+    }
+  }
+
+  private def renderToolbar(editor: LexicalEditor): Unit =
+    if (pluginHost != null) {
+      val container = pluginHost.nn.element.asInstanceOf[HTMLElement]
+      clearDom(container)
+
+      val elements = collectToolbarElements()
+      if (elements.nonEmpty) {
+        val registry = new ToolbarRegistry(elements.toList)
+        val manager = new ToolbarManager(editor, registry, new RibbonRenderer())
+        manager.createToolbar(container)
+      }
+    }
+
+  private def publishEditorState(editor: LexicalEditor, markDirty: Boolean): Unit = {
+    val json = editorStateJson(editor)
+    if (lastSeenStateJson != null && lastSeenStateJson == json) {
+      return
+    }
+
+    val next = encodeExternalValue(json)
+    lastSeenStateJson = json
+    lastSeenValue = next
+
+    if (markDirty) {
+      dirtyProperty.set(true)
+    }
+
+    valueProperty.set(next)
+  }
+
+  private def syncExternalValue(value: js.Any | Null): Unit = {
+    if (!structureInitialized) {
+      return
+    }
+
+    val nextStateJson = toLexicalJson(value).orNull
+    if (sameStateJson(nextStateJson, lastSeenStateJson)) {
+      return
+    }
+
+    lastSeenValue = value
+    lastSeenStateJson = nextStateJson
+
+    if (contentHost != null) {
+      refreshMode()
+    }
+  }
+
+  private def collectToolbarElements(): Seq[ToolbarElement] =
+    pluginComponents.iterator.flatMap(_.toolbarElements).toSeq
+
+  private def collectModules(): Seq[EditorModule] =
+    (Seq(new MarkdownModule()) ++
+      pluginComponents.iterator.flatMap(_.modules).toSeq ++
+      collectToolbarElements().collect { case module: EditorModule => module } ++
+      collectFloatingToolbarModules()).distinct
+
+  private def collectReadOnlyModules(): Seq[EditorModule] =
+    Seq.empty
+
+  private def collectNodes(): Seq[js.Any] =
+    pluginComponents.iterator.flatMap(_.nodes).toSeq
+
+  private def collectFloatingToolbarModules(): Seq[EditorModule] = {
+    val modules = mutable.ArrayBuffer.empty[EditorModule]
+
+    if (pluginComponents.exists(_.isInstanceOf[jfx.form.editor.plugins.BasePlugin])) {
+      modules += EditorModules.BOLD
+      modules += EditorModules.ITALIC
+    }
+
+    if (pluginComponents.exists(_.isInstanceOf[jfx.form.editor.plugins.LinkPlugin])) {
+      modules += new LinkModule()
+    }
+
+    modules.toSeq.distinct
+  }
+
+  private def defaultTheme(): EditorTheme =
+    new EditorThemeBuilder()
+      .withParagraph("lexical-paragraph")
+      .withQuote("lexical-quote")
+      .withHeading(1, "lexical-heading-1")
+      .withHeading(2, "lexical-heading-2")
+      .withHeading(3, "lexical-heading-3")
+      .withTextBold("lexical-text-bold")
+      .withTextItalic("lexical-text-italic")
+      .withTextUnderline("lexical-text-underline")
+      .withTextStrikethrough("lexical-text-strikethrough")
+      .withCode("lexical-text-code")
+      .build()
+
+  private def registerDomListeners(mount: HTMLDivElement): Unit = {
+    val focusInListener: Event => Unit = _ => focusedProperty.set(true)
+    val focusOutListener: Event => Unit = _ => focusedProperty.set(false)
     val linkClickListener: Event => Unit = event => handleInternalDocumentLink(event)
 
     mount.addEventListener("focusin", focusInListener)
@@ -197,221 +387,29 @@ class Editor(val name: String, override val standalone: Boolean = false)
       mount.removeEventListener("focusout", focusOutListener)
       mount.removeEventListener("click", linkClickListener)
     }
-
-    val initialValue = valueProperty.get
-    val initialState = createState(initialValue)
-
-    lastSeenValue = initialValue
-
-    var viewRef: EditorView | Null = null
-
-    val view =
-      new EditorView(
-        mount,
-        directEditorProps(
-          initialState,
-          (tr: Transaction) => {
-            val currentView = viewRef
-
-            if (currentView != null) {
-              val newState = currentView.nn.state.applyTransaction(tr)
-              currentView.nn.updateState(newState)
-              notifyPluginsStateUpdated()
-
-              if (tr.docChanged) {
-                val next = encodeExternalValue(serializeDoc(newState.doc))
-                lastSeenValue = next
-                dirtyProperty.set(true)
-                valueProperty.set(next)
-              }
-            }
-          }
-        )
-      )
-
-    viewRef = view
-
-    editorView = view
-    attachBufferedChildren()
-    bindPlugins(view)
-
-    if (initialValue == null) {
-      val next = encodeExternalValue(serializeDoc(view.state.doc))
-      lastSeenValue = next
-      valueProperty.set(next)
-    }
   }
 
-  private def mountReadOnly(): Unit = {
-    val mount = newElement("div")
-    mount.classList.add("ProseMirror")
-    mount.setAttribute("contenteditable", "false")
-    val linkClickListener: Event => Unit = event => handleInternalDocumentLink(event)
-    mount.addEventListener("click", linkClickListener)
-    editorDomCleanup = () => {
-      mount.removeEventListener("click", linkClickListener)
-    }
-    contentHost.nn.element.appendChild(mount)
-    readOnlyMount = mount
-    lastSeenValue = valueProperty.get
-    renderInto(mount, valueProperty.get)
-  }
+  private def editorStateJson(editor: LexicalEditor): String =
+    js.JSON.stringify(editor.getEditorState().toJSON())
 
-  private def destroyEditorView(): Unit = {
-    bindPlugins(null)
-    readOnlyMount = null
+  private def toLexicalJson(value: js.Any | Null): Option[String] = {
+    val decoded = decodeExternalValue(value)
 
-    if (editorView != null) {
-      try editorView.nn.destroy()
-      catch {
-        case _: Throwable => ()
-      }
-      editorView = null
-    }
-
-    if (editorDomCleanup != null) {
-      editorDomCleanup.nn.apply()
-      editorDomCleanup = null
-    }
-  }
-
-  private def bindPlugins(view: EditorView | Null): Unit =
-    pluginComponents.foreach(_.bindView(view))
-
-  private def notifyPluginsStateUpdated(): Unit =
-    pluginComponents.foreach(_.notifyEditorStateUpdated())
-
-  private def syncExternalValue(value: js.Any | Null): Unit = {
-    if (!structureInitialized) {
-      return
-    }
-
-    if (editorView != null) {
-      if (sameValue(value, lastSeenValue)) {
-        return
-      }
-
-      if (editorSchema != null) {
-        val doc = parseDoc(editorSchema.nn, decodeExternalValue(value))
-        editorView.nn.updateState(
-          EditorState.create(
-            stateConfig(
-              schema = editorSchema.nn,
-              plugins = editorPlugins,
-              doc = doc
-            )
-          )
-        )
-        notifyPluginsStateUpdated()
-        lastSeenValue = value
-      }
-    } else if (readOnlyMount != null) {
-      renderInto(readOnlyMount.nn, value)
-      lastSeenValue = value
-    }
-  }
-
-  private def ensureSchema(): Schema = {
-    if (editorSchema != null) {
-      return editorSchema.nn
-    }
-
-    val specs = js.Dynamic.literal()
-
-    pluginComponents.foreach { plugin =>
-      if (plugin.nodeSpec != null) {
-        specs.updateDynamic(plugin.name)(plugin.nodeSpec.nn)
-      }
-    }
-
-    val customSchema =
-      new Schema(
-        schemaSpec(
-          nodes =
-            SchemaList.addListNodes(
-              SchemaBasic.schema.spec.nodes.asInstanceOf[js.Dynamic].append(specs),
-              "paragraph block*",
-              "block"
-            ),
-          marks = SchemaBasic.schema.spec.marks
-        )
-      )
-
-    editorSchema = customSchema
-    domSerializer = DOMSerializer.fromSchema(customSchema)
-    customSchema
-  }
-
-  private def createState(initialValue: js.Any | Null): EditorState = {
-    val schema = ensureSchema()
-    val itemType =
-      selectNodeType(schema.nodes, "list_item")
-        .getOrElse(throw IllegalStateException("list_item missing in schema"))
-
-    val extraKeys = js.Dynamic.literal(
-      "Enter" -> Commands.chainCommands(
-        SchemaList.splitListItem(itemType),
-        Commands.newlineInCode,
-        Commands.splitBlock,
-        Commands.exitCode
-      ),
-      "Tab" -> SchemaList.sinkListItem(itemType),
-      "Shift-Tab" -> SchemaList.liftListItem(itemType),
-      "Mod-z" -> History.undo,
-      "Mod-y" -> History.redo
-    )
-
-    val defaultPlugins = js.Array[Plugin[js.Any]](
-      History.history(),
-      Keymap.keymap(extraKeys),
-      Keymap.keymap(Commands.baseKeymap)
-    )
-
-    val pluginInstances = js.Array(pluginComponents.iterator.map(_.plugin()).toSeq*)
-    editorPlugins = defaultPlugins.concat(pluginInstances)
-
-    EditorState.create(
-      stateConfig(
-        schema = schema,
-        plugins = editorPlugins,
-        doc = parseDoc(schema, decodeExternalValue(initialValue))
-      )
-    )
-  }
-
-  private def parseDoc(schema: Schema, value: js.Any | Null): PMNode | Null =
-    if (value == null || js.isUndefined(value.asInstanceOf[js.Any])) {
-      null
+    if (decoded == null || js.isUndefined(decoded.asInstanceOf[js.Any])) {
+      None
     } else {
-      try schema.nodeFromJSON(value.asInstanceOf[js.Any])
-      catch {
-        case _: Throwable => null
-      }
-    }
-
-  private def serializeDoc(doc: PMNode): js.Any =
-    doc.toJSON()
-
-  private def renderInto(mount: HTMLDivElement, value: js.Any | Null): Unit = {
-    val schema = ensureSchema()
-    val doc = parseDoc(schema, decodeExternalValue(value))
-
-    clearDom(mount)
-
-    if (doc != null) {
-      val serializer =
-        if (domSerializer != null) domSerializer.nn
-        else {
-          val next = DOMSerializer.fromSchema(schema)
-          domSerializer = next
-          next
+      val asString =
+        if (js.typeOf(decoded.asInstanceOf[js.Any]) == "string") {
+          decoded.asInstanceOf[String]
+        } else {
+          js.JSON.stringify(decoded.asInstanceOf[js.Any])
         }
 
-      mount.appendChild(serializer.serializeFragment(doc.content))
+      Option(asString).map(_.trim).filter(_.nonEmpty)
     }
   }
 
-  private def clearDom(node: HTMLDivElement): Unit = {
+  private def clearDom(node: Node): Unit = {
     var current = node.firstChild
 
     while (current != null) {
@@ -421,8 +419,8 @@ class Editor(val name: String, override val standalone: Boolean = false)
     }
   }
 
-  private def sameValue(left: js.Any | Null, right: js.Any | Null): Boolean =
-    js.special.strictEquals(left.asInstanceOf[js.Any], right.asInstanceOf[js.Any])
+  private def sameStateJson(left: String | Null, right: String | Null): Boolean =
+    Option(left) == Option(right)
 
   private def decodeExternalValue(value: js.Any | Null): js.Any | Null =
     if (value == null || js.isUndefined(value.asInstanceOf[js.Any])) {
@@ -433,13 +431,11 @@ class Editor(val name: String, override val standalone: Boolean = false)
       decodeValue.nn.apply(value.asInstanceOf[js.Any]).asInstanceOf[js.Any | Null]
     }
 
-  private def encodeExternalValue(value: js.Any | Null): js.Any | Null =
-    if (value == null || js.isUndefined(value.asInstanceOf[js.Any])) {
-      value
-    } else if (encodeValue == null) {
+  private def encodeExternalValue(value: String): js.Any | Null =
+    if (encodeValue == null) {
       value
     } else {
-      encodeValue.nn.apply(value.asInstanceOf[js.Any]).asInstanceOf[js.Any | Null]
+      encodeValue.nn.apply(value).asInstanceOf[js.Any | Null]
     }
 
   private def handleInternalDocumentLink(event: Event): Unit = {
@@ -480,43 +476,6 @@ class Editor(val name: String, override val standalone: Boolean = false)
         if (visible) ""
         else "none"
     }
-
-  private def selectNodeType(source: js.Dynamic, key: String): scala.Option[NodeType] = {
-    val value = source.selectDynamic(key).asInstanceOf[js.Any]
-    if (value == null || js.isUndefined(value)) scala.None
-    else scala.Some(value.asInstanceOf[NodeType])
-  }
-
-  private def schemaSpec(nodes: js.Any, marks: js.Any): SchemaSpec = {
-    val spec = (new js.Object).asInstanceOf[SchemaSpec]
-    spec.nodes = nodes
-    spec.marks = marks
-    spec
-  }
-
-  private def stateConfig(
-    schema: Schema,
-    plugins: js.Array[Plugin[js.Any]],
-    doc: PMNode | Null
-  ): EditorStateConfig = {
-    val config = (new js.Object).asInstanceOf[EditorStateConfig]
-    config.schema = schema
-    config.plugins = plugins
-    if (doc != null) {
-      config.doc = doc.nn
-    }
-    config
-  }
-
-  private def directEditorProps(
-    state: EditorState,
-    dispatchTransaction: Transaction => Unit
-  ): DirectEditorProps = {
-    val props = (new js.Object).asInstanceOf[DirectEditorProps]
-    props.state = state
-    props.dispatchTransaction = dispatchTransaction
-    props
-  }
 }
 
 object Editor {

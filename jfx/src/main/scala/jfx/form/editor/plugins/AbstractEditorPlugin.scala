@@ -2,10 +2,7 @@ package jfx.form.editor.plugins
 
 import jfx.core.component.ManagedElementComponent
 import jfx.dsl.{ComponentContext, DslRuntime, Scope}
-import jfx.form.editor.prosemirror.{EditorState, EditorView, PluginView}
 import org.scalajs.dom.HTMLDivElement
-
-import scala.scalajs.js
 
 abstract class AbstractEditorPlugin(cssClass: String)
     extends ManagedElementComponent[HTMLDivElement]
@@ -16,6 +13,7 @@ abstract class AbstractEditorPlugin(cssClass: String)
     if (cssClass != null && cssClass.trim.nonEmpty) {
       divElement.classList.add(cssClass)
     }
+    divElement.style.display = "none"
     divElement
   }
 
@@ -32,21 +30,4 @@ abstract class AbstractEditorPlugin(cssClass: String)
       given Scope = scope
       block
     }
-
-  protected final def syncPluginView(
-    onUpdate: (EditorView, EditorState | Null) => Unit
-  ): js.Function1[EditorView, PluginView] =
-    (_: EditorView) =>
-      js.Dynamic
-        .literal(
-          update = { (view: EditorView, prev: js.UndefOr[EditorState]) =>
-            val previousState =
-              if (js.isUndefined(prev.asInstanceOf[js.Any])) null
-              else prev.asInstanceOf[EditorState]
-
-            onUpdate(view, previousState)
-          },
-          destroy = (() => ())
-        )
-        .asInstanceOf[PluginView]
 }
