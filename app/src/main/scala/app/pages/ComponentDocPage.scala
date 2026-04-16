@@ -601,7 +601,50 @@ class ComponentDocPage(entry: DocEntry) extends CompositeComponent[HTMLDivElemen
         basePlugin()
         headingPlugin()
         listPlugin()
-        linkPlugin()
+        linkPlugin {
+          val link = summon[jfx.form.editor.plugins.LinkPlugin]
+          link.dialogTitle = "Link bearbeiten"
+          link.urlLabel = "Ziel-URL"
+          link.urlPlaceholder = "https://example.com/docs"
+          link.defaultUrl = "https://example.com/docs/editor"
+
+          link.buildDialogContent = { context =>
+            val content = org.scalajs.dom.document.createElement("div").asInstanceOf[org.scalajs.dom.HTMLElement]
+            content.className = "link-plugin-dialog"
+            content.style.display = "flex"
+            content.style.setProperty("flex-direction", "column")
+            content.style.setProperty("gap", "10px")
+
+            val intro = org.scalajs.dom.document.createElement("div").asInstanceOf[org.scalajs.dom.HTMLElement]
+            intro.textContent = "This dialog can be replaced entirely by the application."
+
+            val label = org.scalajs.dom.document.createElement("label").asInstanceOf[org.scalajs.dom.HTMLElement]
+            label.textContent = context.urlLabel
+
+            val input = org.scalajs.dom.document.createElement("input").asInstanceOf[org.scalajs.dom.HTMLInputElement]
+            input.`type` = "url"
+            input.id = "link-url-input"
+            input.placeholder = context.urlPlaceholder
+            input.value = context.currentUrl
+            input.style.width = "100%"
+
+            val note = org.scalajs.dom.document.createElement("div").asInstanceOf[org.scalajs.dom.HTMLElement]
+            note.textContent = "Confirming will update the current link target in place."
+
+            content.appendChild(intro)
+            content.appendChild(label)
+            content.appendChild(input)
+            content.appendChild(note)
+            content
+          }
+
+          link.confirmDialog = { (context, content) =>
+            val urlInput = content.querySelector("#link-url-input").asInstanceOf[org.scalajs.dom.HTMLInputElement]
+            val url = Option(urlInput).map(_.value.trim).getOrElse("")
+            val finalUrl = if (url.isEmpty) null else url
+            context.editor.dispatchCommand(lexical.LexicalLink.TOGGLE_LINK_COMMAND, finalUrl)
+          }
+        }
         imagePlugin()
         tablePlugin()
         codePlugin()
