@@ -4,7 +4,7 @@ import jfx.core.component.{ManagedElementComponent, NodeComponent}
 import jfx.core.state.Property
 import jfx.dsl.*
 import jfx.form.editor.plugins.{DefaultDialogService, EditorPlugin}
-import jfx.layout.{Div, HBox, HorizontalLine, VBox}
+import jfx.layout.{Div, HBox, VBox}
 import lexical.*
 import org.scalajs.dom.{Element, Event, HTMLDivElement, HTMLElement, MouseEvent, Node, window}
 
@@ -34,7 +34,6 @@ class Editor(val name: String, override val standalone: Boolean = false)
   private var toolbarBox: HBox | Null = null
   private var pluginHost: HBox | Null = null
   private var auxiliaryHost: HBox | Null = null
-  private var separator: HorizontalLine | Null = null
   private var contentHost: Div | Null = null
 
   private var lexicalEditor: LexicalEditor | Null = null
@@ -47,7 +46,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
   var decodeValue: js.Function1[js.Any, js.Any] | Null = null
   var encodeValue: js.Function1[js.Any, js.Any] | Null = null
 
-  addDisposable(valueProperty.observe(syncExternalValue))
+  addDisposable(valueProperty.observeWithoutInitial(syncExternalValue))
   addDisposable(editableProperty.observe(_ => refreshMode()))
 
   override protected def mountContent(): Unit = {
@@ -84,9 +83,13 @@ class Editor(val name: String, override val standalone: Boolean = false)
       DslRuntime.withComponentContext(ComponentContext(Some(this), findParentFormOption())) {
         given Scope = capturedScope
 
-        VBox.vbox {
+        Div.div {
           style {
             flex = "1"
+            display = "flex"
+            flexDirection = "column"
+            width = "100%"
+            height = "100%"
             minHeight = "0px"
           }
 
@@ -107,15 +110,8 @@ class Editor(val name: String, override val standalone: Boolean = false)
             auxiliaryHost = HBox.hbox {}
           }
 
-          separator = HorizontalLine.hr() {
-            style {
-              marginTop = "8px"
-            }
-          }
-
           contentHost = Div.div {
             style {
-              display = "flex"
               flex = "1"
               minHeight = "0px"
             }
@@ -142,11 +138,14 @@ class Editor(val name: String, override val standalone: Boolean = false)
       return
     }
 
+    val valueType =
+      if (valueProperty.get == null || js.isUndefined(valueProperty.get.asInstanceOf[js.Any])) "null"
+      else js.typeOf(valueProperty.get.asInstanceOf[js.Any])
+
     val showToolbar =
       editableProperty.get && (collectToolbarElements().nonEmpty || auxiliaryComponents.nonEmpty)
 
     setElementVisible(toolbarBox, showToolbar)
-    setElementVisible(separator, showToolbar)
 
     destroyEditorView()
     clearDom(contentHost.nn.element)
@@ -161,6 +160,10 @@ class Editor(val name: String, override val standalone: Boolean = false)
   private def mountEditable(): Unit = {
     val mount = newElement("div")
     mount.style.setProperty("flex", "1")
+    mount.style.setProperty("display", "flex")
+    mount.style.setProperty("flex-direction", "column")
+    mount.style.setProperty("width", "100%")
+    mount.style.setProperty("height", "100%")
     mount.style.setProperty("min-height", "0px")
     mount.style.setProperty("overflow", "auto")
     contentHost.nn.element.appendChild(mount)
@@ -184,6 +187,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
     lexicalEditor = editor
     readOnlyMount = null
     editor.setDialogService(new DefaultDialogService())
+    syncDecorators(editor)
 
     renderToolbar(editor)
     registerFloatingToolbar(editor)
@@ -200,7 +204,10 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
   private def mountReadOnly(): Unit = {
     val mount = newElement("div")
-    mount.style.setProperty("flex", "1")
+    mount.style.setProperty("display", "flex")
+    mount.style.setProperty("flex-direction", "column")
+    mount.style.setProperty("width", "100%")
+    mount.style.setProperty("height", "100%")
     mount.style.setProperty("min-height", "0px")
     mount.style.setProperty("overflow", "auto")
     mount.classList.add("lexical-read-only")
@@ -224,6 +231,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
     lexicalEditor = builder.build(mount)
     readOnlyMount = mount
+    syncDecorators(lexicalEditor.nn)
     focusedProperty.set(false)
     lastSeenValue = valueProperty.get
     lastSeenStateJson = toLexicalJson(valueProperty.get).orNull
@@ -302,7 +310,7 @@ class Editor(val name: String, override val standalone: Boolean = false)
     }
 
     val next = encodeExternalValue(json)
-    lastSeenStateJson = json
+    lastSeenStateJson = toLexicalJson(next).orNull
     lastSeenValue = next
 
     if (markDirty) {
@@ -314,6 +322,10 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
   private def syncExternalValue(value: js.Any | Null): Unit = {
     if (!structureInitialized) {
+      return
+    }
+
+    if (value == null || js.isUndefined(value.asInstanceOf[js.Any])) {
       return
     }
 
@@ -399,6 +411,19 @@ class Editor(val name: String, override val standalone: Boolean = false)
 
   private def editorStateJson(editor: LexicalEditor): String =
     js.JSON.stringify(editor.getEditorState().toJSON())
+
+  private def syncDecorators(editor: LexicalEditor): Unit = {
+    val decorators = editor.getDecorators()
+    js.Object.entries(decorators).foreach { entry =>
+      val nodeKey = entry._1
+      val decoratorElement = entry._2.asInstanceOf[Node]
+      val nodeContainer = editor.getElementByKey(nodeKey)
+      if (nodeContainer != null && !nodeContainer.contains(decoratorElement)) {
+        nodeContainer.innerHTML = ""
+        nodeContainer.appendChild(decoratorElement)
+      }
+    }
+  }
 
   private def toLexicalJson(value: js.Any | Null): Option[String] = {
     val decoded = decodeExternalValue(value)

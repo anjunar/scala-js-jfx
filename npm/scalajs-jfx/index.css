@@ -89,6 +89,18 @@ html[data-theme="light"] {
     --color-editor-note: #ffc;
     --color-editor-note-border: #cc7;
     --color-editor-metal: silver;
+    --color-editor-ribbon-surface: rgba(251, 246, 240, 0.96);
+    --color-editor-ribbon-surface-strong: rgba(247, 240, 232, 0.98);
+    --color-editor-ribbon-border: rgba(126, 94, 57, 0.18);
+    --color-editor-ribbon-tab: rgba(255, 255, 255, 0.42);
+    --color-editor-ribbon-tab-active: rgba(135, 196, 64, 0.14);
+    --color-editor-ribbon-button: rgba(255, 255, 255, 0.56);
+    --color-editor-ribbon-button-hover: rgba(135, 196, 64, 0.12);
+    --color-editor-ribbon-button-active: rgba(135, 196, 64, 0.18);
+    --color-editor-ribbon-menu: rgba(252, 248, 243, 0.98);
+    --color-editor-ribbon-menu-hover: rgba(135, 196, 64, 0.12);
+    --color-editor-ribbon-text: var(--color-text-primary);
+    --color-editor-ribbon-muted: var(--color-text-faint);
 
     --gradient-surface-soft: linear-gradient(180deg, rgba(250, 245, 239, 0.58), rgba(237, 228, 216, 0.42));
     --gradient-surface-strong: linear-gradient(180deg, rgba(250, 246, 241, 0.68), rgba(237, 227, 214, 0.5));
@@ -202,6 +214,18 @@ html[data-theme="dark"] {
     --color-editor-note: #ffc;
     --color-editor-note-border: #cc7;
     --color-editor-metal: silver;
+    --color-editor-ribbon-surface: rgba(18, 18, 18, 0.72);
+    --color-editor-ribbon-surface-strong: rgba(12, 12, 12, 0.84);
+    --color-editor-ribbon-border: rgba(255, 255, 255, 0.08);
+    --color-editor-ribbon-tab: rgba(255, 255, 255, 0.05);
+    --color-editor-ribbon-tab-active: rgba(164, 255, 79, 0.12);
+    --color-editor-ribbon-button: rgba(255, 255, 255, 0.04);
+    --color-editor-ribbon-button-hover: rgba(164, 255, 79, 0.1);
+    --color-editor-ribbon-button-active: rgba(164, 255, 79, 0.16);
+    --color-editor-ribbon-menu: rgba(16, 18, 22, 0.98);
+    --color-editor-ribbon-menu-hover: rgba(164, 255, 79, 0.1);
+    --color-editor-ribbon-text: var(--color-text-primary);
+    --color-editor-ribbon-muted: var(--color-text-faint);
 
     --gradient-surface-soft: linear-gradient(180deg, rgba(16, 16, 26, 0.76), rgba(18, 18, 30, 0.62));
     --gradient-surface-strong: linear-gradient(180deg, rgba(14, 19, 31, 0.74), rgba(10, 13, 22, 0.58));
