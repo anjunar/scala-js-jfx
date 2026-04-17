@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@anjunar/scalajs-lexical": "^1.0.6",
+    "@anjunar/scalajs-lexical": "^1.0.7",
     "@anjunar/scalajs-jfx": "file:./npm/scalajs-jfx"
   },
   "devDependencies": {

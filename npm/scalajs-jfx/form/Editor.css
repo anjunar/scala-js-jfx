@@ -3,138 +3,256 @@
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
 }
 
 .editor .lexical-ribbon-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 8px;
     width: 100%;
     box-sizing: border-box;
-    background: var(--color-surface-base);
-    border: 1px solid var(--color-editor-border);
-    border-radius: 6px;
-    overflow: hidden;
-    color: var(--color-editor-text);
+    padding: 10px 10px 8px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-editor-ribbon-surface) 68%, transparent);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    color: var(--color-editor-ribbon-text);
 }
 
 .editor .lexical-ribbon-tabs {
     display: flex;
-    gap: 6px;
-    padding: 8px 10px 0;
-    background: var(--color-background-secondary);
     flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 !important;
+    background: transparent !important;
 }
 
 .editor .lexical-ribbon-tab {
-    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    font-weight: 600;
-    color: var(--color-editor-text-strong);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-editor-ribbon-muted);
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.editor .lexical-ribbon-tab:hover {
+    background: color-mix(in srgb, var(--color-editor-ribbon-tab) 52%, transparent);
+    color: var(--color-editor-ribbon-text);
 }
 
 .editor .lexical-ribbon-tab.active {
-    border-bottom-color: var(--color-accent);
-    background: var(--color-surface-base);
+    background: color-mix(in srgb, var(--color-selected) 8%, transparent);
+    border-color: color-mix(in srgb, var(--color-gray-200) 36%, transparent);
+    color: var(--color-editor-ribbon-text);
 }
 
 .editor .lexical-ribbon-content {
     display: flex;
-    gap: 12px;
-    padding: 10px;
-    min-height: 72px;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
     flex-wrap: wrap;
+}
+
+.editor .lexical-ribbon-tab-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.editor .lexical-ribbon-tab-content:last-child {
+    width: 100%;
+    gap: 16px;
+    padding-top: 2px;
 }
 
 .editor .lexical-ribbon-section {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 0 10px 0 0;
-    border-right: 1px solid var(--color-editor-rule);
-    flex-shrink: 0;
+    padding: 0 12px 10px 0;
+    border-right: 1px solid color-mix(in srgb, var(--color-gray-200) 26%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-gray-200) 22%, transparent);
+}
+
+.editor .lexical-ribbon-tab-content:last-child .lexical-ribbon-section {
+    flex: 1 1 220px;
+    min-width: 220px;
+    gap: 8px;
+    padding-left: 4px;
+    padding-right: 18px;
+    padding-bottom: 12px;
+}
+
+.editor .lexical-ribbon-tab-content:last-child .lexical-ribbon-section:last-child {
+    min-width: 180px;
 }
 
 .editor .lexical-ribbon-section:last-child {
+    border-bottom: none;
     border-right: none;
+    padding-bottom: 0;
     padding-right: 0;
 }
 
 .editor .lexical-ribbon-buttons-container {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     min-height: 36px;
+    flex-wrap: wrap;
 }
 
 .editor .lexical-ribbon-section-label {
-    font-size: 10px;
-    letter-spacing: 0;
-    color: var(--color-editor-text);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: var(--color-editor-ribbon-muted);
     text-transform: uppercase;
     user-select: none;
     cursor: pointer;
-    border-top: 1px solid var(--color-editor-rule);
-    padding-top: 4px;
-    text-align: center;
+    line-height: 1.15;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--color-gray-200) 22%, transparent);
 }
 
 .editor .lexical-ribbon-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 6px;
     min-height: 30px;
-    padding: 6px 10px;
+    padding: 0 10px;
     border: 1px solid transparent;
-    border-radius: 6px;
+    border-radius: 8px;
     background: transparent;
-    color: var(--color-editor-text-strong);
+    color: var(--color-editor-ribbon-text);
     cursor: pointer;
     font: inherit;
     line-height: 1;
     white-space: nowrap;
-    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
 .editor .lexical-ribbon-button:hover {
-    background: var(--color-editor-hover);
-    border-color: var(--color-editor-border);
+    background: color-mix(in srgb, var(--color-editor-ribbon-button-hover) 72%, transparent);
+    border-color: color-mix(in srgb, var(--color-gray-200) 28%, transparent);
 }
 
 .editor .lexical-ribbon-button.active {
-    background: var(--color-editor-active);
-    border-color: var(--color-editor-border);
-    color: var(--color-black);
+    background: color-mix(in srgb, var(--color-editor-ribbon-button-active) 70%, transparent);
+    border-color: color-mix(in srgb, var(--color-gray-200) 34%, transparent);
+    color: var(--color-selected);
 }
 
 .editor .lexical-dropdown-wrapper {
     position: relative;
+    display: inline-flex;
+    align-items: stretch;
+}
+
+.editor .lexical-ribbon-tab-content:last-child .lexical-ribbon-button {
+    padding-left: 12px;
+    padding-right: 12px;
 }
 
 .editor .lexical-dropdown-menu {
     position: fixed;
     z-index: 3000;
     min-width: 180px;
-    margin-top: 4px;
-    border: 1px solid var(--color-editor-border);
-    border-radius: 6px;
-    background: var(--color-surface-base);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+    padding: 6px;
+    border: 1px solid color-mix(in srgb, var(--color-gray-200) 26%, transparent);
+    border-radius: 10px;
+    background: var(--color-editor-ribbon-menu);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--color-shadow-strong) 36%, transparent);
     overflow: hidden;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .editor .lexical-dropdown-item {
-    padding: 8px 12px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    border-radius: 8px;
     cursor: pointer;
-    color: var(--color-editor-text-strong);
+    color: var(--color-editor-ribbon-text);
 }
 
 .editor .lexical-dropdown-item:hover {
-    background: var(--color-editor-hover);
+    background: var(--color-editor-ribbon-menu-hover);
+}
+
+.editor .lexical-floating-toolbar {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid color-mix(in srgb, var(--color-gray-200) 26%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-editor-ribbon-surface) 72%, transparent);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--color-shadow-medium) 28%, transparent);
+}
+
+.editor .lexical-floating-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    min-width: 30px;
+    padding: 0 9px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-editor-ribbon-text);
+    cursor: pointer;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.editor .lexical-floating-button:hover {
+    background: color-mix(in srgb, var(--color-editor-ribbon-button-hover) 72%, transparent);
+    border-color: color-mix(in srgb, var(--color-gray-200) 28%, transparent);
+}
+
+.editor .lexical-floating-button.active {
+    background: color-mix(in srgb, var(--color-editor-ribbon-button-active) 72%, transparent);
+    border-color: color-mix(in srgb, var(--color-gray-200) 34%, transparent);
+    color: var(--color-selected);
+}
+
+.editor .lexical-editor-input,
+.editor .lexical-read-only {
+    flex: 0 1 auto;
+    min-height: 0;
+    height: auto;
+}
+
+.editor .lexical-editor-input {
+    display: block;
+    overflow: auto;
+}
+
+.editor div:has(> .lexical-editor-input),
+.editor div:has(> .lexical-read-only) {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+    height: auto;
 }
 
 .editor .lexical-editor-input table,

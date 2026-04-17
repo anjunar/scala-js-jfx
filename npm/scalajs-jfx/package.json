@@ -1,6 +1,6 @@
 {
   "name": "@anjunar/scalajs-jfx",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "NPM companion package for scalajs-jfx: the default JFX component CSS.",
   "type": "module",
   "license": "MIT",
