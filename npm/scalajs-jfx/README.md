@@ -10,7 +10,12 @@ Install it next to the Scala.js dependency:
 npm install @anjunar/scalajs-jfx
 ```
 
-Import the CSS from your Vite entrypoint:
+Import the shared Anjunar UI grammar once in your application stylesheet, then import the JFX package CSS from your Vite entrypoint:
+
+```css
+@import "tailwindcss";
+@import "@anjunar/ui";
+```
 
 ```javascript
 import '@anjunar/scalajs-jfx/index.css'

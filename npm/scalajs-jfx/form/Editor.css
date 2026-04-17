@@ -367,17 +367,17 @@
 }
 
 .jfx-window:has(.image-plugin-dialog) .jfx-window__surface {
-    background: var(--aj-glass-bg);
-    border: 1px solid color-mix(in srgb, var(--aj-glass-border) 12%, transparent);
+    background: var(--aj-overlay-bg);
+    border: 1px solid color-mix(in srgb, var(--aj-overlay-border) 12%, transparent);
     box-shadow:
-            0 14px 34px color-mix(in srgb, var(--aj-glass-shadow) 26%, transparent),
+            0 14px 34px color-mix(in srgb, var(--aj-shadow-medium) 26%, transparent),
             inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(var(--aj-overlay-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--aj-overlay-blur)) saturate(180%);
 }
 
 .jfx-window:has(.image-plugin-dialog) .jfx-window__header {
-    border-bottom: 1px solid color-mix(in srgb, var(--aj-glass-border) 10%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--aj-chrome-border) 10%, transparent);
 }
 
 .image-plugin-dialog {
@@ -405,13 +405,13 @@
 
 .image-plugin-dialog__preview-shell,
 .image-plugin-dialog__field-group {
-    border: 1px solid color-mix(in srgb, var(--aj-glass-border) 10%, transparent);
-    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--aj-overlay-border) 10%, transparent);
+    border-radius: var(--aj-overlay-radius);
     padding: 14px;
     background: transparent !important;
     box-shadow: none;
-    backdrop-filter: blur(8px) saturate(180%);
-    -webkit-backdrop-filter: blur(8px) saturate(180%);
+    backdrop-filter: blur(calc(var(--aj-overlay-blur) - 6px)) saturate(180%);
+    -webkit-backdrop-filter: blur(calc(var(--aj-overlay-blur) - 6px)) saturate(180%);
 }
 
 .image-plugin-dialog__preview-shell {
@@ -427,7 +427,7 @@
     max-width: 100%;
     width: auto;
     margin: 0 auto;
-    border-radius: 18px;
+    border-radius: var(--aj-overlay-radius);
 }
 
 .image-plugin-dialog__preview-placeholder {
@@ -476,7 +476,7 @@
     min-height: 38px;
     padding: 8px 14px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--aj-glass-border) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aj-control-border-hover) 10%, transparent);
     background: transparent !important;
     box-shadow: none;
     font-size: 12px;

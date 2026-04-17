@@ -60,12 +60,12 @@
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--aj-glass-border);
-  border-radius: 0.9rem;
-  background: var(--aj-glass-bg);
-  backdrop-filter: blur(var(--aj-glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--aj-glass-blur)) saturate(180%);
-  box-shadow: 0 6px 24px var(--aj-glass-shadow);
+  border: 1px solid var(--aj-floating-border);
+  border-radius: var(--aj-floating-radius);
+  background: var(--aj-floating-bg);
+  backdrop-filter: blur(var(--aj-floating-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--aj-floating-blur)) saturate(180%);
+  box-shadow: var(--aj-floating-shadow);
 }
 
 .jfx-combo-box__table {
@@ -115,7 +115,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border-top: 1px solid var(--aj-glass-border);
+  border-top: 1px solid var(--aj-floating-border);
   color: var(--aj-accent);
   font-size: 14px;
   font-weight: 600;

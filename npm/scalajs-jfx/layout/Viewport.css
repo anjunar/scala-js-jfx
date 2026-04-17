@@ -6,11 +6,11 @@
 
     .jfx2-overlay {
         position : fixed;
-        background : var(--aj-glass-bg);
-        border : 1px solid var(--aj-glass-border);
-        box-shadow : 0 6px 24px var(--aj-glass-shadow);
-        border-radius : 1rem;
-        backdrop-filter : blur(var(--aj-glass-blur)) saturate(180%);
+        background : var(--aj-overlay-bg);
+        border : 1px solid var(--aj-overlay-border);
+        box-shadow : var(--aj-overlay-shadow);
+        border-radius : var(--aj-overlay-radius);
+        backdrop-filter : blur(var(--aj-overlay-blur)) saturate(180%);
     }
 
     .jfx2-notification-host {
@@ -34,12 +34,12 @@
         max-width: 420px;
         padding: 10px 12px;
 
-        background: var(--aj-glass-bg);
-        backdrop-filter: blur(var(--aj-glass-blur)) saturate(180%);
-        -webkit-backdrop-filter: blur(var(--aj-glass-blur)) saturate(180%);
-        border: 1px solid var(--aj-glass-border);
-        box-shadow: 0 6px 24px var(--aj-glass-shadow);
-        border-radius: 0.75rem;
+        background: var(--aj-overlay-bg);
+        backdrop-filter: blur(var(--aj-overlay-blur)) saturate(180%);
+        -webkit-backdrop-filter: blur(var(--aj-overlay-blur)) saturate(180%);
+        border: 1px solid var(--aj-overlay-border);
+        box-shadow: var(--aj-overlay-shadow);
+        border-radius: var(--aj-floating-radius);
 
         color: var(--aj-ink);
         line-height: 1.3;
@@ -91,12 +91,12 @@
     max-width: 420px;
     padding: 10px 12px;
     color: var(--aj-ink);
-    background: var(--aj-glass-bg);
-    border: 1px solid var(--aj-glass-border);
-    border-radius: 0.75rem;
-    box-shadow: 0 6px 24px var(--aj-glass-shadow);
-    backdrop-filter: blur(var(--aj-glass-blur)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--aj-glass-blur)) saturate(180%);
+    background: var(--aj-overlay-bg);
+    border: 1px solid var(--aj-overlay-border);
+    border-radius: var(--aj-floating-radius);
+    box-shadow: var(--aj-overlay-shadow);
+    backdrop-filter: blur(var(--aj-overlay-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--aj-overlay-blur)) saturate(180%);
     line-height: 1.3;
     transition:
             opacity 0.25s ease,

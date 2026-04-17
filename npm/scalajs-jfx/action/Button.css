@@ -36,7 +36,7 @@ button {
     &.btn-secondary {
         width: 200px;
         background-color: var(--aj-surface-hover);
-        border : 1px solid var(--aj-glass-border);
+        border : 1px solid var(--aj-control-border-hover);
     }
 
     &.btn-danger {
