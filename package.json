@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@anjunar/scalajs-lexical": "^1.0.7",
+    "@anjunar/scalajs-lexical": "^1.0.8",
     "@anjunar/scalajs-jfx": "file:./npm/scalajs-jfx",
-    "@anjunar/ui": "file:../anjunar-ui"
+    "@anjunar/ui": "^1.0.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
