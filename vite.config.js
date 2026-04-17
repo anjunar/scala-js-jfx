@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import scalaJSPlugin from "@scala-js/vite-plugin-scalajs";
+import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 
 export default defineConfig({
@@ -10,6 +11,7 @@ export default defineConfig({
         emptyOutDir: true,
     },
     plugins: [
+        tailwindcss(),
         scalaJSPlugin({
             cwd: ".",
             projectID: "scalajs-jfx-demo",

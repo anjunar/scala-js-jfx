@@ -2,8 +2,8 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px var(--color-background-primary) inset !important;
-    -webkit-text-fill-color: var(--color-text) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--aj-canvas) inset !important;
+    -webkit-text-fill-color: var(--aj-ink) !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -17,32 +17,32 @@ input {
     width: 100%;
 
     &.focus {
-        color: var(--color-selected);
+        color: var(--aj-accent);
 
         &::placeholder {
-            color: var(--color-selected);
+            color: var(--aj-accent);
         }
     }
 
 
     &.dirty {
-        color: var(--color-warning);
+        color: var(--aj-warning);
 
         &::placeholder {
-            color: var(--color-warning);
+            color: var(--aj-warning);
         }
     }
 
     &.invalid {
-        color: var(--color-error);
+        color: var(--aj-danger);
 
         &::placeholder {
-            color: var(--color-error);
+            color: var(--aj-danger);
         }
     }
 
     &::placeholder {
-        color: var(--color-text);
+        color: var(--aj-ink);
         opacity: 0.64;
     }
 

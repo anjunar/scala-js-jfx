@@ -16,11 +16,11 @@
     box-sizing: border-box;
     padding: 10px 10px 8px;
     border-radius: 10px;
-    background: color-mix(in srgb, var(--color-editor-ribbon-surface) 68%, transparent);
+    background: color-mix(in srgb, var(--aj-surface) 68%, transparent);
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    color: var(--color-editor-ribbon-text);
+    color: var(--aj-ink);
 }
 
 .editor .lexical-ribbon-tabs {
@@ -44,19 +44,19 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-editor-ribbon-muted);
+    color: var(--aj-ink-faint);
     transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 }
 
 .editor .lexical-ribbon-tab:hover {
-    background: color-mix(in srgb, var(--color-editor-ribbon-tab) 52%, transparent);
-    color: var(--color-editor-ribbon-text);
+    background: color-mix(in srgb, var(--aj-surface-muted) 52%, transparent);
+    color: var(--aj-ink);
 }
 
 .editor .lexical-ribbon-tab.active {
-    background: color-mix(in srgb, var(--color-selected) 8%, transparent);
-    border-color: color-mix(in srgb, var(--color-gray-200) 36%, transparent);
-    color: var(--color-editor-ribbon-text);
+    background: color-mix(in srgb, var(--aj-accent) 8%, transparent);
+    border-color: color-mix(in srgb, var(--aj-line-strong) 36%, transparent);
+    color: var(--aj-ink);
 }
 
 .editor .lexical-ribbon-content {
@@ -85,8 +85,8 @@
     flex-direction: column;
     gap: 6px;
     padding: 0 12px 10px 0;
-    border-right: 1px solid color-mix(in srgb, var(--color-gray-200) 26%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-gray-200) 22%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--aj-line-strong) 26%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--aj-line-strong) 22%, transparent);
 }
 
 .editor .lexical-ribbon-tab-content:last-child .lexical-ribbon-section {
@@ -120,13 +120,13 @@
 .editor .lexical-ribbon-section-label {
     font-size: 9px;
     letter-spacing: 0.16em;
-    color: var(--color-editor-ribbon-muted);
+    color: var(--aj-ink-faint);
     text-transform: uppercase;
     user-select: none;
     cursor: pointer;
     line-height: 1.15;
     padding-top: 10px;
-    border-top: 1px solid color-mix(in srgb, var(--color-gray-200) 22%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--aj-line-strong) 22%, transparent);
 }
 
 .editor .lexical-ribbon-button {
@@ -139,7 +139,7 @@
     border: 1px solid transparent;
     border-radius: 8px;
     background: transparent;
-    color: var(--color-editor-ribbon-text);
+    color: var(--aj-ink);
     cursor: pointer;
     font: inherit;
     line-height: 1;
@@ -148,14 +148,14 @@
 }
 
 .editor .lexical-ribbon-button:hover {
-    background: color-mix(in srgb, var(--color-editor-ribbon-button-hover) 72%, transparent);
-    border-color: color-mix(in srgb, var(--color-gray-200) 28%, transparent);
+    background: color-mix(in srgb, var(--aj-accent-muted) 72%, transparent);
+    border-color: color-mix(in srgb, var(--aj-line-strong) 28%, transparent);
 }
 
 .editor .lexical-ribbon-button.active {
-    background: color-mix(in srgb, var(--color-editor-ribbon-button-active) 70%, transparent);
-    border-color: color-mix(in srgb, var(--color-gray-200) 34%, transparent);
-    color: var(--color-selected);
+    background: color-mix(in srgb, var(--aj-accent-muted) 70%, transparent);
+    border-color: color-mix(in srgb, var(--aj-line-strong) 34%, transparent);
+    color: var(--aj-accent);
 }
 
 .editor .lexical-dropdown-wrapper {
@@ -174,10 +174,10 @@
     z-index: 3000;
     min-width: 180px;
     padding: 6px;
-    border: 1px solid color-mix(in srgb, var(--color-gray-200) 26%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aj-line-strong) 26%, transparent);
     border-radius: 10px;
-    background: var(--color-editor-ribbon-menu);
-    box-shadow: 0 8px 18px color-mix(in srgb, var(--color-shadow-strong) 36%, transparent);
+    background: var(--aj-surface-overlay);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--aj-shadow-strong) 36%, transparent);
     overflow: hidden;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -190,11 +190,11 @@
     padding: 0 10px;
     border-radius: 8px;
     cursor: pointer;
-    color: var(--color-editor-ribbon-text);
+    color: var(--aj-ink);
 }
 
 .editor .lexical-dropdown-item:hover {
-    background: var(--color-editor-ribbon-menu-hover);
+    background: var(--aj-accent-muted);
 }
 
 .editor .lexical-floating-toolbar {
@@ -202,10 +202,10 @@
     flex-wrap: wrap;
     gap: 6px;
     padding: 6px;
-    border: 1px solid color-mix(in srgb, var(--color-gray-200) 26%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aj-line-strong) 26%, transparent);
     border-radius: 10px;
-    background: color-mix(in srgb, var(--color-editor-ribbon-surface) 72%, transparent);
-    box-shadow: 0 8px 18px color-mix(in srgb, var(--color-shadow-medium) 28%, transparent);
+    background: color-mix(in srgb, var(--aj-surface) 72%, transparent);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--aj-shadow-medium) 28%, transparent);
 }
 
 .editor .lexical-floating-button {
@@ -218,20 +218,20 @@
     border: 1px solid transparent;
     border-radius: 8px;
     background: transparent;
-    color: var(--color-editor-ribbon-text);
+    color: var(--aj-ink);
     cursor: pointer;
     transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
 .editor .lexical-floating-button:hover {
-    background: color-mix(in srgb, var(--color-editor-ribbon-button-hover) 72%, transparent);
-    border-color: color-mix(in srgb, var(--color-gray-200) 28%, transparent);
+    background: color-mix(in srgb, var(--aj-accent-muted) 72%, transparent);
+    border-color: color-mix(in srgb, var(--aj-line-strong) 28%, transparent);
 }
 
 .editor .lexical-floating-button.active {
-    background: color-mix(in srgb, var(--color-editor-ribbon-button-active) 72%, transparent);
-    border-color: color-mix(in srgb, var(--color-gray-200) 34%, transparent);
-    color: var(--color-selected);
+    background: color-mix(in srgb, var(--aj-accent-muted) 72%, transparent);
+    border-color: color-mix(in srgb, var(--aj-line-strong) 34%, transparent);
+    color: var(--aj-accent);
 }
 
 .editor .lexical-editor-input,
@@ -263,8 +263,8 @@
     border-spacing: 0;
     margin: 12px 0;
     table-layout: auto;
-    background: var(--color-surface-base);
-    border: 1px solid var(--color-editor-border);
+    background: var(--aj-surface);
+    border: 1px solid var(--aj-line);
     border-radius: 8px;
     overflow: hidden;
 }
@@ -281,9 +281,9 @@
     min-width: 96px;
     padding: 10px 12px;
     vertical-align: top;
-    border-right: 1px solid var(--color-editor-rule);
-    border-bottom: 1px solid var(--color-editor-rule);
-    color: var(--color-editor-text);
+    border-right: 1px solid var(--aj-line-soft);
+    border-bottom: 1px solid var(--aj-line-soft);
+    color: var(--aj-ink-muted);
     background: transparent;
 }
 
@@ -304,8 +304,8 @@
 .editor .lexical-editor-input table th,
 .editor .lexical-read-only table th {
     font-weight: 600;
-    background: var(--color-background-secondary);
-    color: var(--color-editor-text-strong);
+    background: var(--aj-surface-muted);
+    color: var(--aj-ink-soft);
 }
 
 .jfx-dialog-backdrop {
@@ -321,8 +321,8 @@
 
 .jfx-dialog {
     width: min(720px, 100%);
-    background: var(--color-surface-base);
-    border: 1px solid var(--color-editor-border);
+    background: var(--aj-surface);
+    border: 1px solid var(--aj-line);
     border-radius: 8px;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
     padding: 16px;
@@ -334,7 +334,7 @@
 .jfx-dialog__title {
     margin: 0;
     font-size: 16px;
-    color: var(--color-editor-text-strong);
+    color: var(--aj-ink-soft);
 }
 
 .jfx-dialog__content {
@@ -349,35 +349,35 @@
 
 .jfx-dialog__button {
     border-radius: 6px;
-    border: 1px solid var(--color-editor-border);
+    border: 1px solid var(--aj-line);
     padding: 8px 12px;
     cursor: pointer;
     font: inherit;
 }
 
 .jfx-dialog__button--secondary {
-    background: var(--color-surface-base);
-    color: var(--color-editor-text-strong);
+    background: var(--aj-surface);
+    color: var(--aj-ink-soft);
 }
 
 .jfx-dialog__button--primary {
-    background: var(--color-accent);
-    border-color: var(--color-accent-strong);
-    color: var(--color-black);
+    background: var(--aj-accent);
+    border-color: var(--aj-accent-strong);
+    color: var(--aj-ink-inverse);
 }
 
 .jfx-window:has(.image-plugin-dialog) .jfx-window__surface {
-    background: var(--glass-bg);
-    border: 1px solid color-mix(in srgb, var(--glass-border) 12%, transparent);
+    background: var(--aj-glass-bg);
+    border: 1px solid color-mix(in srgb, var(--aj-glass-border) 12%, transparent);
     box-shadow:
-            0 14px 34px color-mix(in srgb, var(--glass-shadow) 26%, transparent),
+            0 14px 34px color-mix(in srgb, var(--aj-glass-shadow) 26%, transparent),
             inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
 }
 
 .jfx-window:has(.image-plugin-dialog) .jfx-window__header {
-    border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--aj-glass-border) 10%, transparent);
 }
 
 .image-plugin-dialog {
@@ -405,7 +405,7 @@
 
 .image-plugin-dialog__preview-shell,
 .image-plugin-dialog__field-group {
-    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aj-glass-border) 10%, transparent);
     border-radius: 18px;
     padding: 14px;
     background: transparent !important;
@@ -438,7 +438,7 @@
     justify-content: center;
     text-align: center;
     padding: 18px;
-    color: var(--color-text-faint);
+    color: var(--aj-ink-faint);
     opacity: 0.74;
 }
 
@@ -476,7 +476,7 @@
     min-height: 38px;
     padding: 8px 14px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--glass-border) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aj-glass-border) 10%, transparent);
     background: transparent !important;
     box-shadow: none;
     font-size: 12px;
@@ -485,7 +485,7 @@
 }
 
 .image-plugin-dialog__button--primary {
-    border-color: color-mix(in srgb, var(--color-selected) 22%, white 8%);
+    border-color: color-mix(in srgb, var(--aj-accent) 22%, white 8%);
 }
 
 .image-plugin-dialog__button--ghost {
@@ -506,7 +506,7 @@
 }
 
 .image-plugin-dialog__meta--error {
-    color: var(--color-error);
+    color: var(--aj-danger);
     opacity: 0.92;
 }
 

@@ -21,15 +21,15 @@
     }
 
     .label .focus {
-        color: var(--color-selected) !important;
+        color: var(--aj-accent) !important;
     }
 
     .label .dirty {
-        color: var(--color-warning) !important;;
+        color: var(--aj-warning) !important;;
     }
 
     .label .invalid {
-        color: var(--color-error) !important;;
+        color: var(--aj-danger) !important;;
     }
 
 
@@ -43,20 +43,20 @@
     }
 
     hr.focus {
-        background-color: var(--color-selected);
+        background-color: var(--aj-accent);
     }
 
     hr.dirty {
-        background-color: var(--color-warning);
+        background-color: var(--aj-warning);
     }
 
     hr.invalid {
-        background-color: var(--color-error);
+        background-color: var(--aj-danger);
     }
 
     .errors {
         margin-top: 6px;
-        color: var(--color-error);
+        color: var(--aj-danger);
         font-size: 10px;
         height: 12px;
     }

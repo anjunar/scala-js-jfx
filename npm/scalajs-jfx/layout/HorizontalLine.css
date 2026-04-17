@@ -1,7 +1,7 @@
 hr {
     border: 0;
-    border-top: 1px solid var(--color-border-muted);
+    border-top: 1px solid var(--aj-line);
     margin: 0;
-    color: var(--color-border-muted);
-    background-color: var(--color-border-muted);
+    color: var(--aj-line);
+    background-color: var(--aj-line);
 }

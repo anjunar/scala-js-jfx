@@ -12,17 +12,17 @@
 .form-page__transition-button {
     min-height: 38px;
     padding: 10px 12px;
-    border: 1px solid var(--color-border-subtle);
+    border: 1px solid var(--aj-line-soft);
     border-radius: 999px;
-    background: var(--color-surface-soft);
-    color: var(--color-text-secondary);
+    background: var(--aj-surface-muted);
+    color: var(--aj-ink-soft);
     cursor: pointer;
 }
 
 .form-page__transition-button.is-active {
-    border-color: var(--color-accent);
-    background: var(--color-accent-ghost);
-    color: var(--color-accent-strong);
+    border-color: var(--aj-accent);
+    background: var(--aj-accent-muted);
+    color: var(--aj-accent-strong);
 }
 
 .form-page__layout {
@@ -73,18 +73,18 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-text-muted);
+    color: var(--aj-ink-muted);
 }
 
 .form-page .input-container .control {
     padding: 10px 12px;
-    border: 1px solid var(--color-border-strong);
+    border: 1px solid var(--aj-line-strong);
     border-radius: 16px;
-    background: var(--color-surface-overlay);
+    background: var(--aj-surface-overlay);
 }
 
 .form-page .input-container .control input::placeholder {
-    color: var(--color-text-muted);
+    color: var(--aj-ink-muted);
     opacity: 1;
 }
 
@@ -121,7 +121,7 @@
 }
 
 .form-page__combo-note {
-    color: var(--color-text-secondary);
+    color: var(--aj-ink-soft);
     font-size: 0.84rem;
     line-height: 1.45;
 }
@@ -134,8 +134,8 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: var(--color-accent-ghost);
-    color: var(--color-accent-strong);
+    background: var(--aj-accent-muted);
+    color: var(--aj-accent-strong);
 }
 
 .form-page__combo-item.is-selected,
@@ -144,12 +144,12 @@
 }
 
 .form-page__combo-item.is-selected .form-page__combo-pill {
-    background: var(--color-accent);
-    color: var(--color-text-inverse);
+    background: var(--aj-accent);
+    color: var(--aj-ink-inverse);
 }
 
 .form-page__combo-value.is-placeholder .form-page__combo-label {
-    color: var(--color-text-muted);
+    color: var(--aj-ink-muted);
 }
 
 .address-form__card,
@@ -160,9 +160,9 @@
     flex-direction: column;
     gap: 10px;
     padding: 18px;
-    border: 1px solid var(--color-border-subtle);
+    border: 1px solid var(--aj-line-soft);
     border-radius: 20px;
-    background: var(--color-surface-overlay);
+    background: var(--aj-surface-overlay);
 }
 
 .address-form__card {
@@ -189,7 +189,7 @@
 .form-page__ledger-copy,
 .form-page__prompt-copy,
 .form-page__context-item {
-    color: var(--color-text-secondary);
+    color: var(--aj-ink-soft);
     line-height: 1.55;
 }
 
@@ -216,7 +216,7 @@
 
 .form-page__context-item {
     padding-top: 10px;
-    border-top: 1px solid var(--color-border-subtle);
+    border-top: 1px solid var(--aj-line-soft);
 }
 
 .form-page__context-item:first-of-type {
@@ -235,7 +235,7 @@
     font-size: 0.76rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-text-muted);
+    color: var(--aj-ink-muted);
 }
 
 .form-page__snapshot {
