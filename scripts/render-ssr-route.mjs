@@ -9,7 +9,7 @@ if (!entryPath || !routePath || !outputPath) {
   process.exit(2);
 }
 
-const siteBase = "https://anjunar.github.io/scala-js-jfx";
+const siteBase = "https://anjunar.github.io/scalajs-jfx";
 const routeUrl = new URL(routePath, `${siteBase}/`).href;
 const window = new Window({
   url: routeUrl,
@@ -20,7 +20,7 @@ const window = new Window({
 window.document.documentElement.innerHTML = `<!doctype html>
 <html lang="en" data-theme="light">
   <head>
-    <base href="/scala-js-jfx/" />
+    <base href="/scalajs-jfx/" />
     <title>SSR</title>
   </head>
   <body>

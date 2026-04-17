@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Diese Datei konkretisiert die uebergeordnete `../AGENTS.md` fuer `scala-js-jfx`.
+Diese Datei konkretisiert die uebergeordnete `../AGENTS.md` fuer `scalajs-jfx`.
 
 ## Geerbte Leitplanken
 
@@ -13,7 +13,7 @@ Diese Datei konkretisiert die uebergeordnete `../AGENTS.md` fuer `scala-js-jfx`.
 
 ## Projektbild
 
-`scala-js-jfx` ist ein Scala.js UI-Framework mit JavaFX-inspirierter DSL. Der Kern liegt im Modul `jfx`; `app` ist Demo, Dokumentation und Showcase; `docs` ist der gebaute GitHub-Pages-Output.
+`scalajs-jfx` ist ein Scala.js UI-Framework mit JavaFX-inspirierter DSL. Der Kern liegt im Ordner `jfx` und im sbt-Projekt `scalajs-jfx`; `app` ist Demo, Dokumentation und Showcase; `docs` ist der gebaute GitHub-Pages-Output.
 
 - `jfx/src/main/scala/jfx`: wiederverwendbare Bibliothek.
 - `jfx/src/main/resources/jfx`: Basis-CSS der Bibliothekskomponenten.
@@ -27,15 +27,15 @@ Diese Datei konkretisiert die uebergeordnete `../AGENTS.md` fuer `scala-js-jfx`.
 
 - Scala `3.8.3`, Scala.js Plugin `1.20.2`, sbt `1.12.9`.
 - Scala.js linker: ES modules, ES2021.
-- Maven-relevantes Artefakt ist nur `scala-js-jfx` im Modul `jfx`; `app` und `root` werden nicht publiziert.
+- Maven-relevantes Artefakt ist nur `scalajs-jfx` im Modul `jfx`; `app` und `root` werden nicht publiziert.
 - Vite root ist `app/src/main/webapp/`; Build-Output geht nach `docs`.
-- Vite nutzt `@scala-js/vite-plugin-scalajs` mit `projectID: "scala-js-jfx-demo"`.
+- Vite nutzt `@scala-js/vite-plugin-scalajs` mit `projectID: "scalajs-jfx-demo"`.
 
 Typische Kommandos:
 
 ```powershell
-sbtn jfx/compile
-sbtn jfx/test
+sbtn scalajs-jfx/compile
+sbtn scalajs-jfx/test
 npm run build
 npm run dev
 ```
@@ -111,8 +111,8 @@ Wenn ein Browserkontext gebraucht wird, headless mit `1980x1080` arbeiten.
 
 ## Tests Und Verifikation
 
-- Fuer Bibliothekslogik gezielt `sbtn jfx/test` verwenden.
-- Fuer einzelne ScalaTest-Specs, wenn noetig, ueber sbt testOnly arbeiten, weiterhin via `sbtn`.
+- Fuer Bibliothekslogik gezielt `sbtn scalajs-jfx/test` verwenden.
+- Fuer einzelne ScalaTest-Specs, wenn noetig, `testOnly` verwenden, weiterhin via `sbtn`.
 - UI-/Build-Aenderungen nach Moeglichkeit mit `npm run build` pruefen, weil Vite und static-route-Generierung zusammenhaengen.
 - Bei Aenderungen an Lifecycle, Scope, Routing, Forms oder JSON lieber kleine Regressionstests in `jfx/src/test/scala` ergaenzen.
 

@@ -1,6 +1,6 @@
-# scala-js-jfx
+# scalajs-jfx
 
-`scala-js-jfx` is a reactive UI framework for Scala.js with a strong focus on structured state, lifecycle control, and composable UI DSLs.
+`scalajs-jfx` is a reactive UI framework for Scala.js with a strong focus on structured state, lifecycle control, and composable UI DSLs.
 
 It provides a declarative, JavaFX-inspired DSL for building DOM trees, managing reactive state, wiring forms to model properties, and rendering route-driven views in the browser.
 
@@ -13,9 +13,9 @@ Most Scala.js UI frameworks focus either on functional reactivity or simple DOM 
 - safe resource disposal
 - scalable UI composition for complex applications
 
-`scala-js-jfx` addresses these gaps by combining:
+`scalajs-jfx` addresses these gaps by combining:
 
-- a `NodeScope` / `Dispose` model for precise lifecycle management
+- a `NodeComponent` / `Disposable` model for precise lifecycle management
 - a browser-focused DSL inspired by JavaFX
 - reactive state bindings without hidden magic
 - strong support for virtualized and dynamic UIs
@@ -32,7 +32,7 @@ The library is organized around a few core ideas:
 
 ## Core Concepts
 
-### NodeScope And Lifecycle
+### NodeComponent And Lifecycle
 
 Every UI subtree lives in a controlled scope. That gives you:
 
@@ -71,14 +71,14 @@ The framework includes built-in support for:
 
 ## Module
 
-This repository contains multiple modules, but the reusable library is `jfx`.
+This repository contains multiple modules, but the reusable library lives in `jfx` and has the sbt project ID `scalajs-jfx`.
 
 ```scala
-lazy val jfx = (project in file("jfx"))
+lazy val jfx = Project(id = "scalajs-jfx", base = file("jfx"))
   .enablePlugins(ScalaJSPlugin)
   .settings(
-    name := "scala-js-jfx",
-    moduleName := "scala-js-jfx"
+    name := "scalajs-jfx",
+    moduleName := "scalajs-jfx"
   )
 ```
 
@@ -87,7 +87,7 @@ lazy val jfx = (project in file("jfx"))
 Add the library to a Scala.js project:
 
 ```scala
-libraryDependencies += "com.anjunar" %%% "scala-js-jfx" % "1.0.5"
+libraryDependencies += "com.anjunar" %%% "scalajs-jfx" % "1.0.7"
 ```
 
 The current build uses:
@@ -402,7 +402,7 @@ val windowedRoot = viewport {
 
 ## When Should You Use It?
 
-Use `scala-js-jfx` if:
+Use `scalajs-jfx` if:
 
 - you build complex UIs such as tables, editors, or dashboards
 - you need precise lifecycle control
@@ -450,11 +450,11 @@ Compared to other approaches:
 Typical local tasks:
 
 ```bash
-sbt jfx/compile
-sbt jfx/test
+sbtn scalajs-jfx/compile
+sbtn scalajs-jfx/test
 ```
 
-If you want to work on the library inside this repository, focus on the `jfx` module. The `app` module is only a consumer/demo and is not required to use the library itself.
+If you want to work on the library inside this repository, focus on the `jfx` folder / `scalajs-jfx` sbt project. The `app` module is only a consumer/demo and is not required to use the library itself.
 
 ## Publishing To Maven Central
 
@@ -483,8 +483,8 @@ password=<sonatype-token>
 Release commands:
 
 ```bash
-sbt "; project jfx" "; publishSigned" "; sonaUpload"
-sbt "; project jfx" "; publishSigned" "; sonaRelease"
+sbtn "; project jfx" "; publishSigned" "; sonaUpload"
+sbtn "; project jfx" "; publishSigned" "; sonaRelease"
 ```
 
 Notes:

@@ -7,11 +7,7 @@ import app.pages.TablePage.tablePage
 import app.pages.WindowPage.windowPage
 import app.pages.ComponentDocPage.componentDocPage
 import app.pages.DocsIndexPage.docsIndexPage
-import jfx.core.component.ElementComponent.*
-import jfx.dsl.*
-import jfx.layout.Div.div
 import jfx.router.Route
-import jfx.router.RouteContext.routeContext
 
 import scala.scalajs.js
 
@@ -22,18 +18,18 @@ object Routes {
 
     routes.push(
       Route.scoped(
-        path = "/table",
+        path = "/form",
         factory = {
-          tablePage()
+          formPage()
         }
       )
     )
 
     routes.push(
       Route.scoped(
-        path = "/form",
+        path = "/table",
         factory = {
-          formPage()
+          tablePage()
         }
       )
     )
@@ -66,18 +62,6 @@ object Routes {
         )
       )
     }
-
-    routes.push(
-      Route.scoped(
-        path = "/person",
-        factory = {
-          val context = routeContext
-          div {
-            text = s"Person ${context.queryParams.get("id").getOrElse("")}".trim
-          }
-        }
-      )
-    )
 
     routes
   }

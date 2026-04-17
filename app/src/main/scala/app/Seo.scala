@@ -4,9 +4,9 @@ import app.pages.DocsCatalog
 import org.scalajs.dom.{Element, HTMLLinkElement, HTMLMetaElement, HTMLScriptElement, document}
 
 object Seo:
-  private val siteBase = "https://anjunar.github.io/scala-js-jfx"
+  private val siteBase = "https://anjunar.github.io/scalajs-jfx"
   private val defaultDescription =
-    "scala-js-jfx is a reactive Scala.js UI framework with lifecycle control, typed forms, routing, tables and a composable JavaFX-inspired DSL."
+    "scalajs-jfx is a reactive Scala.js UI framework with lifecycle control, typed forms, routing, tables and a composable JavaFX-inspired DSL."
   private val defaultImage = s"$siteBase/og-image.svg"
 
   final case class RouteMeta(
@@ -24,19 +24,19 @@ object Seo:
       DocsCatalog.find(slug)
         .map { entry =>
           RouteMeta(
-            title = s"${entry.name} Docs | scala-js-jfx",
+            title = s"${entry.name} Docs | scalajs-jfx",
             description = s"${entry.name}: ${entry.summary}",
             canonicalPath = canonicalPath(normalized)
           )
         }
-        .getOrElse(RouteMeta("Component Docs | scala-js-jfx", defaultDescription, canonicalPath(normalized)))
+        .getOrElse(RouteMeta("Component Docs | scalajs-jfx", defaultDescription, canonicalPath(normalized)))
     else
       val route = ShowcaseCatalog.descriptorFor(normalized)
       if normalized == "/" then
-        RouteMeta("scala-js-jfx | Reactive UI Framework for Scala.js", defaultDescription, "/")
+        RouteMeta("scalajs-jfx | Reactive UI Framework for Scala.js", defaultDescription, "/")
       else
         RouteMeta(
-          title = s"${route.title} | scala-js-jfx",
+          title = s"${route.title} | scalajs-jfx",
           description = route.summary,
           canonicalPath = canonicalPath(normalized)
         )
@@ -56,7 +56,7 @@ object Seo:
     setStructuredData(meta)
 
   private def normalizePath(path: String): String =
-    val withoutBase = path.stripPrefix("/scala-js-jfx")
+    val withoutBase = path.stripPrefix("/scalajs-jfx")
     val withoutQuery = withoutBase.takeWhile(_ != '?').takeWhile(_ != '#')
     if withoutQuery.isEmpty then "/" else withoutQuery
 
@@ -109,7 +109,7 @@ object Seo:
          |  "url": "${escapeJson(meta.canonicalUrl)}",
          |  "isPartOf": {
          |    "@type": "WebSite",
-         |    "name": "scala-js-jfx",
+         |    "name": "scalajs-jfx",
          |    "url": "$siteBase/"
          |  }
          |}""".stripMargin

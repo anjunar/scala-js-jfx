@@ -7,44 +7,44 @@ import { promisify } from "node:util";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const root = resolve(scriptDir, "..");
 const outDir = join(root, "docs");
-const siteBase = "https://anjunar.github.io/scala-js-jfx";
+const siteBase = "https://anjunar.github.io/scalajs-jfx";
 const indexPath = join(outDir, "index.html");
 const docsCatalogPath = join(root, "app", "src", "main", "scala", "app", "pages", "DocsCatalog.scala");
 const ssrRouteScript = join(scriptDir, "render-ssr-route.mjs");
 const execFileAsync = promisify(execFile);
 
 const defaultDescription =
-  "scala-js-jfx is a reactive Scala.js UI framework with lifecycle control, typed forms, routing, tables and a composable JavaFX-inspired DSL.";
+  "scalajs-jfx is a reactive Scala.js UI framework with lifecycle control, typed forms, routing, tables and a composable JavaFX-inspired DSL.";
 const imageUrl = `${siteBase}/og-image.svg`;
 
 const fixedRoutes = [
   {
     path: "/",
-    title: "scala-js-jfx | Reactive UI Framework for Scala.js",
+    title: "scalajs-jfx | Reactive UI Framework for Scala.js",
     description: defaultDescription,
     priority: "1.0",
   },
   {
     path: "/form/",
-    title: "Forms Workspace | scala-js-jfx",
+    title: "Forms Workspace | scalajs-jfx",
     description: "Typed forms become a protected editing surface with revision logs and live snapshots.",
     priority: "0.8",
   },
   {
     path: "/table/",
-    title: "Data Queue | scala-js-jfx",
+    title: "Data Queue | scalajs-jfx",
     description: "Remote data stays meaningful by exposing loading, filtering and tension in the same field.",
     priority: "0.8",
   },
   {
     path: "/window/",
-    title: "Window Workspace | scala-js-jfx",
+    title: "Window Workspace | scalajs-jfx",
     description: "Windows and notifications support secondary work without collapsing the main surface.",
     priority: "0.7",
   },
   {
     path: "/docs/",
-    title: "Component Docs | scala-js-jfx",
+    title: "Component Docs | scalajs-jfx",
     description: "Component knowledge stays organized without losing live examples.",
     priority: "0.9",
   },
@@ -56,7 +56,7 @@ const docRoutes = [...docsCatalog.matchAll(
   /DocEntry\(\s*slug = "([^"]+)",\s*category = "([^"]+)",\s*name = "([^"]+)",\s*packageName = "([^"]+)",\s*tagline = "([^"]+)",\s*summary = "([^"]+)"/g
 )].map(([, slug, , name, , , summary]) => ({
   path: `/docs/${slug}/`,
-  title: `${name} Docs | scala-js-jfx`,
+  title: `${name} Docs | scalajs-jfx`,
   description: `${name}: ${summary}`,
   priority: "0.7",
 }));
@@ -90,7 +90,7 @@ function withRouteMeta(html, route) {
     url: canonicalUrl,
     isPartOf: {
       "@type": "WebSite",
-      name: "scala-js-jfx",
+      name: "scalajs-jfx",
       url: `${siteBase}/`,
     },
   };

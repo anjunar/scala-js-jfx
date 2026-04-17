@@ -40,11 +40,11 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
       openLinkEditor(editor)
   }
 
-  private def openLinkEditor(editor: LexicalEditor): Unit = {
+  protected def openLinkEditor(editor: LexicalEditor): Unit = {
     val context =
       LinkDialogContext(
         editor = editor,
-        selection = editor.read(() => Lexical.$getSelection()),
+        selection = currentSelection(editor),
         currentUrl = currentLinkUrl(editor),
         dialogTitle = dialogTitle,
         urlLabel = urlLabel,
@@ -58,7 +58,25 @@ class LinkPlugin extends AbstractEditorPlugin("link-plugin") {
     )
   }
 
-  private def currentLinkUrl(editor: LexicalEditor): String =
+  protected final def applyLink(editor: LexicalEditor, selection: BaseSelection | Null, url: String | Null): Unit =
+    editor.update(
+      () => {
+        if (selection != null) {
+          Lexical.$setSelection(selection.clone().asInstanceOf[RangeSelection | NodeSelection])
+        }
+        val finalUrl = Option(url).map(_.trim).filter(_.nonEmpty).orNull
+        LexicalLink.$toggleLink(finalUrl)
+      },
+      js.Dynamic.literal().asInstanceOf[lexical.EditorUpdateOptions]
+    )
+
+  protected final def currentSelection(editor: LexicalEditor): BaseSelection | Null =
+    editor.read(() => {
+      val selection = Lexical.$getSelection()
+      if (selection != null) selection.clone() else null
+    })
+
+  protected final def currentLinkUrl(editor: LexicalEditor): String =
     editor.getEditorState().read(() => {
       val nodes = editor.getSelectionWrapper().getNodes
       nodes.find(node => LexicalLink.$isLinkNode(node)).map { node =>

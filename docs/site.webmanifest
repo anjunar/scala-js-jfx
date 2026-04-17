@@ -1,15 +1,15 @@
 {
-  "name": "scala-js-jfx",
-  "short_name": "scala-js-jfx",
+  "name": "scalajs-jfx",
+  "short_name": "scalajs-jfx",
   "description": "Reactive UI framework for Scala.js with lifecycle control and a composable DSL.",
-  "start_url": "/scala-js-jfx/",
-  "scope": "/scala-js-jfx/",
+  "start_url": "/scalajs-jfx/",
+  "scope": "/scalajs-jfx/",
   "display": "standalone",
   "background_color": "#f6f7f5",
   "theme_color": "#f6f7f5",
   "icons": [
     {
-      "src": "/scala-js-jfx/favicon.svg",
+      "src": "/scalajs-jfx/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

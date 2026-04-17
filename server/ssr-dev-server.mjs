@@ -53,7 +53,7 @@ async function createSSRServer() {
 }
 
 async function renderWithSSR(templateHtml, url) {
-  const routeUrl = `https://anjunar.github.io/scala-js-jfx${url}`;
+  const routeUrl = `https://anjunar.github.io/scalajs-jfx${url}`;
 
   const window = new Window({
     url: routeUrl,

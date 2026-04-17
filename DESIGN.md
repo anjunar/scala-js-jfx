@@ -1,6 +1,6 @@
-# DESIGN.md — Scala JFX Design Guide
+# DESIGN.md — scalajs-jfx Design Guide
 
-Project: Technology Speaks
+Project: scalajs-jfx
 Principle: Manifest der Stille
 
 ---
@@ -81,7 +81,7 @@ Layout is separation before beauty.
 * No “flat” layouts where everything competes equally
 * White space is functional, not aesthetic
 
-### Implementation Hint (Scala JFX)
+### Implementation Hint (scalajs-jfx)
 
 * Prefer explicit container hierarchy
 * Avoid dynamic layout ambiguity
@@ -288,7 +288,7 @@ Error is material, not failure.
 
 ---
 
-## 12. Architecture Alignment (Scala JFX)
+## 12. Architecture Alignment (scalajs-jfx)
 
 UI must reflect domain truth.
 

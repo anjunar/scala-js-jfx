@@ -3,7 +3,7 @@ import scalaJSPlugin from "@scala-js/vite-plugin-scalajs";
 import { resolve } from "node:path"
 
 export default defineConfig({
-    base: "/scala-js-jfx/",
+    base: "/scalajs-jfx/",
     root: "app/src/main/webapp/",
     build: {
         outDir: resolve(__dirname, "docs"),
@@ -12,7 +12,7 @@ export default defineConfig({
     plugins: [
         scalaJSPlugin({
             cwd: ".",
-            projectID: "scala-js-jfx-demo",
+            projectID: "scalajs-jfx-demo",
         }),
     ],
     resolve: {

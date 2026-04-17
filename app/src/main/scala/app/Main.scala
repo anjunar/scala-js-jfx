@@ -47,7 +47,7 @@ object Main {
 
             div {
               classes = "app-nav-intro__copy"
-              text = "Each page shows one part of scala-js-jfx in a simpler, more direct way."
+              text = "Each page shows one part of scalajs-jfx in a simpler, more direct way."
             }
           }
 

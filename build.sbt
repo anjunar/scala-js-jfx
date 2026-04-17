@@ -6,14 +6,14 @@ ThisBuild / organization := "com.anjunar"
 ThisBuild / organizationName := "Anjunar"
 ThisBuild / organizationHomepage := Some(url("https://github.com/anjunar"))
 ThisBuild / scalaVersion := "3.8.3"
-ThisBuild / homepage := Some(url("https://github.com/anjunar/scala-js-jfx"))
+ThisBuild / homepage := Some(url("https://github.com/anjunar/scalajs-jfx"))
 ThisBuild / description := "Reactive UI framework for Scala.js with lifecycle control, typed forms, routing, tables, and a composable DSL."
 ThisBuild / licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/anjunar/scala-js-jfx"),
-    "scm:git:https://github.com/anjunar/scala-js-jfx.git",
-    Some("scm:git:git@github.com:anjunar/scala-js-jfx.git")
+    url("https://github.com/anjunar/scalajs-jfx"),
+    "scm:git:https://github.com/anjunar/scalajs-jfx.git",
+    Some("scm:git:git@github.com:anjunar/scalajs-jfx.git")
   )
 )
 ThisBuild / developers := List(
@@ -42,21 +42,21 @@ lazy val commonJsSettings = Seq(
     )
 )
 
-lazy val jfx = Project(id = "scala-js-jfx", base = file("jfx"))
+lazy val jfx = Project(id = "scalajs-jfx", base = file("jfx"))
   .enablePlugins(ScalaJSPlugin)
   .settings(
-    name := "scala-js-jfx",
-    moduleName := "scala-js-jfx",
+    name := "scalajs-jfx",
+    moduleName := "scalajs-jfx",
     Compile / doc / sources := Seq.empty,
     libraryDependencies += "com.anjunar" %%% "scala-reflect" % "1.0.0",
-    libraryDependencies += "com.anjunar" %%% "scalajs-lexical" % "1.0.5",
+    libraryDependencies += "com.anjunar" %%% "scalajs-lexical" % "1.0.6",
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1",
     libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.19" % Test
   )
   .settings(commonJsSettings)
 
-lazy val app = Project(id = "scala-js-jfx-demo", base = file("app"))
+lazy val app = Project(id = "scalajs-jfx-demo", base = file("app"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(jfx)
   .settings(
@@ -65,7 +65,7 @@ lazy val app = Project(id = "scala-js-jfx-demo", base = file("app"))
   )
   .settings(commonJsSettings)
 
-lazy val root = Project(id = "scala-js-jfx-root", base = file("."))
+lazy val root = Project(id = "scalajs-jfx-root", base = file("."))
   .aggregate(jfx, app)
   .settings(
     publish / skip := true

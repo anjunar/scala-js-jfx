@@ -36,7 +36,7 @@ class HomePage extends CompositeComponent[HTMLDivElement] {
 
         image {
           classes = "home-hero__image"
-          src = "/scala-js-jfx/og-image.svg"
+          src = "/scalajs-jfx/og-image.svg"
           alt = ""
         }
 
@@ -56,7 +56,7 @@ class HomePage extends CompositeComponent[HTMLDivElement] {
           div {
             classes = "home-hero__copy"
             text =
-              "scala-js-jfx brings a JavaFX-inspired component model to Scala.js: routed pages, typed form state, remote data views, secondary windows and live reference material all follow one composable DSL."
+              "scalajs-jfx brings a JavaFX-inspired component model to Scala.js: routed pages, typed form state, remote data views, secondary windows and live reference material all follow one composable DSL."
           }
 
           hbox {
@@ -138,7 +138,7 @@ class HomePage extends CompositeComponent[HTMLDivElement] {
         sectionHeading(
           label = "Value",
           title = "The benefits are practical: less glue, clearer boundaries, safer UI state.",
-          copy = "scala-js-jfx is useful when a browser app needs real structure without giving up the speed and reach of Scala.js."
+          copy = "scalajs-jfx is useful when a browser app needs real structure without giving up the speed and reach of Scala.js."
         )
 
         div {
