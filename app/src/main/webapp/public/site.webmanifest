@@ -5,8 +5,8 @@
   "start_url": "/scalajs-jfx/",
   "scope": "/scalajs-jfx/",
   "display": "standalone",
-  "background_color": "#f6f7f5",
-  "theme_color": "#f6f7f5",
+  "background_color": "#eee9e1",
+  "theme_color": "#eee9e1",
   "icons": [
     {
       "src": "/scalajs-jfx/favicon.svg",

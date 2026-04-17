@@ -241,8 +241,8 @@
 .form-page__snapshot {
     padding: 16px;
     border-radius: 18px;
-    background: #17201c;
-    color: #d9e6db;
+    background: var(--aj-surface-overlay);
+    color: var(--aj-ink);
     font-family: "Consolas", "SFMono-Regular", monospace;
     font-size: 0.88rem;
     line-height: 1.65;

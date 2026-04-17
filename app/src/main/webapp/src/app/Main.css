@@ -1,9 +1,6 @@
 .app-shell {
     min-height: 100%;
-    background:
-        radial-gradient(circle at top left, rgba(109, 123, 99, 0.1), transparent 18%),
-        radial-gradient(circle at bottom right, rgba(93, 115, 128, 0.08), transparent 18%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 24%);
+    background: var(--app-shell-bg);
 }
 
 .app-shell .jfx-drawer__navigation {
@@ -35,7 +32,7 @@
     border: 1px solid var(--aj-line-strong);
     border-radius: 22px;
     background: var(--aj-gradient-surface-strong);
-    box-shadow: 0 18px 36px var(--aj-shadow-medium);
+    box-shadow: var(--app-shell-intro-shadow);
 }
 
 .app-nav-intro__title {
@@ -72,7 +69,7 @@
     border: 1px solid var(--aj-line-soft);
     border-radius: 18px;
     background: var(--aj-surface-raised);
-    box-shadow: 0 12px 28px var(--aj-shadow-medium);
+    box-shadow: var(--app-shell-card-shadow);
     cursor: pointer;
     transition:
         transform 180ms ease,
@@ -91,7 +88,7 @@
 
 .app-nav-card.is-active {
     border-color: var(--aj-accent);
-    background: linear-gradient(180deg, var(--aj-surface-overlay), var(--aj-accent-muted));
+    background: var(--app-shell-card-active-bg);
     box-shadow: inset 0 0 0 1px var(--aj-accent-ring);
 }
 
@@ -128,19 +125,44 @@
     top: 16px;
     left: 16px;
     z-index: 5;
+    display: flex;
+    gap: 10px;
 }
 
+.app-icon-button,
 .app-menu-button {
     width: 40px;
     height: 40px;
+    padding: 0;
     border-radius: 12px;
     flex: 0 0 auto;
-    border: 1px solid var(--aj-line-soft);
-    background: var(--aj-surface-raised);
+    border: 1px solid var(--app-shell-control-border);
+    background: var(--app-shell-control-bg);
+    color: var(--aj-ink);
+    box-shadow: var(--app-shell-control-shadow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.app-theme-button {
+    min-width: 78px;
+    padding: 0 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.app-icon-button:hover,
 .app-menu-button:hover {
-    background: var(--aj-surface-overlay);
+    background: var(--app-shell-control-hover-bg);
+}
+
+.app-icon-button:focus-visible,
+.app-menu-button:focus-visible {
+    outline: 2px solid var(--aj-accent-ring);
+    outline-offset: 2px;
 }
 
 .app-content {

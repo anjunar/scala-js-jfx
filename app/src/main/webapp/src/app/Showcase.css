@@ -3,7 +3,7 @@
 }
 
 .clarity-page--home {
-    color: #14221e;
+    color: var(--aj-ink);
 }
 
 .clarity-page--home .calm-action {
@@ -20,12 +20,10 @@
     min-height: min(560px, calc(100vh - 220px));
     overflow: hidden;
     padding: 58px 56px 34px;
-    border: 1px solid rgba(28, 58, 48, 0.18);
+    border: 1px solid var(--aj-line-strong);
     border-radius: 8px;
-    background:
-        linear-gradient(90deg, rgba(247, 250, 248, 0.98) 0%, rgba(247, 250, 248, 0.9) 48%, rgba(235, 243, 239, 0.78) 100%),
-        #f7faf8;
-    box-shadow: 0 24px 54px rgba(18, 35, 30, 0.12);
+    background: var(--aj-gradient-surface-soft);
+    box-shadow: var(--aj-shadow-float);
 }
 
 .home-hero::before {
@@ -34,8 +32,8 @@
     inset: 0;
     z-index: -1;
     background-image:
-        linear-gradient(rgba(26, 64, 52, 0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(26, 64, 52, 0.07) 1px, transparent 1px);
+        linear-gradient(color-mix(in srgb, var(--aj-ink) 7%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--aj-ink) 7%, transparent) 1px, transparent 1px);
     background-size: 64px 64px;
 }
 
@@ -45,8 +43,8 @@
     inset: auto 0 0;
     z-index: -1;
     height: 34%;
-    border-top: 1px solid rgba(25, 64, 51, 0.1);
-    background: linear-gradient(180deg, transparent, rgba(220, 234, 228, 0.56));
+    border-top: 1px solid var(--aj-line-soft);
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--aj-surface-muted) 78%, transparent));
 }
 
 .home-hero__image {
@@ -73,7 +71,7 @@
     font-weight: 760;
     letter-spacing: 0;
     text-transform: uppercase;
-    color: #49645b;
+    color: var(--aj-ink-soft);
 }
 
 .home-hero__title {
@@ -82,14 +80,14 @@
     font-size: 3.9rem;
     line-height: 0.98;
     letter-spacing: 0;
-    color: #10221c;
+    color: var(--aj-ink);
 }
 
 .home-hero__copy {
     max-width: 68ch;
     font-size: 1.08rem;
     line-height: 1.72;
-    color: #344d44;
+    color: var(--aj-ink-soft);
 }
 
 .home-hero__actions {
@@ -110,10 +108,10 @@
     flex-direction: column;
     gap: 10px;
     min-width: 0;
-    border: 1px solid rgba(29, 65, 52, 0.16);
+    border: 1px solid var(--aj-line-soft);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.74);
-    box-shadow: 0 16px 32px rgba(20, 39, 33, 0.08);
+    background: var(--aj-surface-raised);
+    box-shadow: var(--aj-shadow-panel);
 }
 
 .home-metric {
@@ -129,7 +127,7 @@
     font-weight: 760;
     letter-spacing: 0;
     text-transform: uppercase;
-    color: #5b7169;
+    color: var(--aj-ink-muted);
 }
 
 .home-metric__title,
@@ -139,7 +137,7 @@
     font-size: 1.04rem;
     font-weight: 760;
     line-height: 1.28;
-    color: #132720;
+    color: var(--aj-ink);
 }
 
 .home-metric__body,
@@ -148,7 +146,7 @@
 .home-demo-card__body,
 .home-section-heading__copy,
 .home-closing__body {
-    color: #385249;
+    color: var(--aj-ink-soft);
     line-height: 1.65;
 }
 
@@ -168,7 +166,7 @@
     grid-template-columns: minmax(120px, 0.22fr) minmax(0, 0.78fr);
     gap: 16px 28px;
     align-items: start;
-    border-top: 1px solid rgba(34, 68, 56, 0.16);
+    border-top: 1px solid var(--aj-line-soft);
     padding-top: 22px;
 }
 
@@ -178,7 +176,7 @@
     font-size: 2rem;
     line-height: 1.08;
     letter-spacing: 0;
-    color: #11251e;
+    color: var(--aj-ink);
 }
 
 .home-section-heading__copy {
@@ -198,7 +196,7 @@
     position: relative;
     min-height: 210px;
     padding: 18px;
-    background: linear-gradient(180deg, #ffffff, #f4f8f6);
+    background: var(--aj-gradient-surface-soft);
 }
 
 .home-architecture-step + .home-architecture-step::before {
@@ -208,7 +206,7 @@
     left: -13px;
     width: 13px;
     height: 1px;
-    background: rgba(35, 78, 61, 0.28);
+    background: var(--aj-line-strong);
 }
 
 .home-benefit-grid,
@@ -227,7 +225,7 @@
     min-height: 292px;
     padding: 18px;
     justify-content: space-between;
-    background: linear-gradient(180deg, #ffffff, #f6f9f8);
+    background: var(--aj-gradient-surface-soft);
 }
 
 .home-demo-card .calm-action {
@@ -241,9 +239,9 @@
     align-items: center;
     margin-top: 6px;
     padding: 28px;
-    border: 1px solid rgba(29, 65, 52, 0.16);
+    border: 1px solid var(--aj-line-soft);
     border-radius: 8px;
-    background: linear-gradient(135deg, #edf5f1, #ffffff);
+    background: var(--aj-gradient-surface-soft);
 }
 
 .home-closing__copy {
@@ -258,7 +256,7 @@
     font-size: 1.8rem;
     line-height: 1.12;
     letter-spacing: 0;
-    color: #10221c;
+    color: var(--aj-ink);
 }
 
 .clarity-grid {
@@ -344,10 +342,10 @@
     border: 1px solid var(--aj-line-strong);
     border-radius: 32px;
     background:
-        radial-gradient(circle at top right, rgba(109, 123, 99, 0.14), transparent 34%),
-        radial-gradient(circle at bottom left, rgba(93, 115, 128, 0.08), transparent 28%),
+        radial-gradient(circle at top right, color-mix(in srgb, var(--aj-accent) 14%, transparent), transparent 34%),
+        radial-gradient(circle at bottom left, color-mix(in srgb, var(--aj-info) 10%, transparent), transparent 28%),
         var(--aj-gradient-surface-strong);
-    box-shadow: 0 24px 44px var(--aj-shadow-medium);
+    box-shadow: var(--aj-shadow-float);
 }
 
 .clarity-hero::before {
@@ -439,28 +437,28 @@
 .app-state-chip.is-raw {
     color: var(--app-raw);
     background: var(--app-raw-soft);
-    border-color: rgba(122, 109, 89, 0.18);
+    border-color: color-mix(in srgb, var(--app-raw) 18%, transparent);
 }
 
 .clarity-state-chip.is-clarification,
 .app-state-chip.is-clarification {
     color: var(--app-clarification);
     background: var(--app-clarification-soft);
-    border-color: rgba(108, 122, 88, 0.2);
+    border-color: color-mix(in srgb, var(--app-clarification) 20%, transparent);
 }
 
 .clarity-state-chip.is-condensed,
 .app-state-chip.is-condensed {
     color: var(--app-condensed);
     background: var(--app-condensed-soft);
-    border-color: rgba(93, 115, 128, 0.2);
+    border-color: color-mix(in srgb, var(--app-condensed) 20%, transparent);
 }
 
 .clarity-state-chip.is-archived,
 .app-state-chip.is-archived {
     color: var(--app-archived);
     background: var(--app-archived-soft);
-    border-color: rgba(101, 112, 122, 0.2);
+    border-color: color-mix(in srgb, var(--app-archived) 20%, transparent);
 }
 
 .calm-action {
@@ -836,8 +834,8 @@
 .component-doc__code {
     padding: 18px;
     border-radius: 18px;
-    background: #17201c;
-    color: #d9e6db;
+    background: var(--aj-surface-overlay);
+    color: var(--aj-ink);
     font-size: 0.9rem;
     line-height: 1.65;
     white-space: pre-wrap;

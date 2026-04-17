@@ -4,6 +4,7 @@ import app.domain.DomainRegistry
 import jfx.action.Button.*
 import jfx.core.component.ElementComponent.*
 import jfx.core.component.NodeComponent.mount
+import jfx.core.state.Property
 import jfx.dsl.*
 import jfx.dsl.Scope.{inject, scope, singleton}
 import jfx.layout.Div.div
@@ -19,6 +20,9 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     DomainRegistry.init()
+
+    val themeProperty = Property(Theme.initialMode())
+    Theme.apply(themeProperty.get)
 
     scope {
       singleton[Router] {
@@ -69,12 +73,30 @@ object Main {
 
               button("menu") {
                 buttonType = "button"
-                classes = Seq("material-icons", "app-menu-button")
+                classes = Seq("material-icons", "app-icon-button", "app-menu-button")
 
                 onClick { _ =>
                   toggleDrawer
                 }
               }
+
+              val themeButton = button(Theme.buttonLabel(themeProperty.get)) {
+                buttonType = "button"
+                classes = Seq("app-icon-button", "app-theme-button")
+
+                onClick { _ =>
+                  themeProperty.set(Theme.toggle(themeProperty.get))
+                }
+              }
+
+              themeButton.element.title = Theme.label(themeProperty.get)
+              themeButton.element.setAttribute("aria-label", Theme.label(themeProperty.get))
+
+              themeButton.addDisposable(themeProperty.observe { mode =>
+                themeButton.textContent = Theme.buttonLabel(mode)
+                themeButton.element.title = Theme.label(mode)
+                themeButton.element.setAttribute("aria-label", Theme.label(mode))
+              })
             }
 
             div {
@@ -106,6 +128,10 @@ object Main {
         router.stateProperty.observe { state =>
           Seo(state.path)
         }
+      )
+
+      container.addDisposable(
+        themeProperty.observe(Theme.apply)
       )
 
       val root = document.getElementById("root")
