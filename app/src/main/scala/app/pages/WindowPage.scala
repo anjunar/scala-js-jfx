@@ -1,5 +1,5 @@
 package app.pages
-import jfx.action.Button.{button, onClick}
+import jfx.action.Button.button
 import jfx.core.component.CompositeComponent
 import jfx.core.component.CompositeComponent.composite
 import jfx.core.component.ElementComponent.*

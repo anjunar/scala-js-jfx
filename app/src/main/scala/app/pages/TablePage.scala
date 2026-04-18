@@ -330,7 +330,6 @@ class TablePage extends CompositeComponent[HTMLDivElement] {
               }
             }
 
-            table
           }
         }
 

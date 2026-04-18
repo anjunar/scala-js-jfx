@@ -50,15 +50,4 @@ object Button {
   def buttonType_=(value: String)(using button: Button): Unit =
     button.buttonType = value
 
-  def onClick(listener: Event => Unit)(using button: Button): Disposable =
-    DslRuntime.currentScope { currentScope =>
-      val currentContext = DslRuntime.currentComponentContext()
-      button.addClick { event =>
-        DslRuntime.withScope(currentScope) {
-          DslRuntime.withComponentContext(currentContext) {
-            listener(event)
-          }
-        }
-      }
-    }
 }

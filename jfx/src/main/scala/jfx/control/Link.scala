@@ -53,20 +53,4 @@ object Link {
   def href_=(value: String)(using link: Link): Unit =
     link.href = value
 
-  def onClick(listener: Event => Unit)(using link: Link): Disposable = {
-    DslRuntime.currentScope { currentScope =>
-      val currentContext = DslRuntime.currentComponentContext()
-      val wrapped: Event => Unit = event =>
-        DslRuntime.withScope(currentScope) {
-          DslRuntime.withComponentContext(currentContext) {
-            listener(event)
-          }
-        }
-
-      link.element.addEventListener("click", wrapped)
-      val disposable: Disposable = () => link.element.removeEventListener("click", wrapped)
-      link.addDisposable(disposable)
-      disposable
-    }
-  }
 }

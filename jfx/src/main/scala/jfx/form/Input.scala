@@ -57,17 +57,6 @@ class Input(val name: String, override val standalone: Boolean = false) extends 
   def readOnly_=(value: Boolean): Unit =
     element.readOnly = value
 
-  def onClick(listener: Event => Unit): Unit =
-    DslRuntime.currentScope { currentScope =>
-      val currentContext = DslRuntime.currentComponentContext()
-      element.onclick = event =>
-        DslRuntime.withScope(currentScope) {
-          DslRuntime.withComponentContext(currentContext) {
-            listener(event)
-          }
-        }
-    }
-
   private def applyElementValue(value: String | Boolean | Double): Unit =
     element.`type` match {
       case "checkbox" =>
@@ -175,6 +164,4 @@ object Input {
   def readOnly_=(value: Boolean)(using input: Input): Unit =
     input.readOnly = value
 
-  def onClick(listener: Event => Unit)(using input: Input): Unit =
-    input.onClick(listener)
 }

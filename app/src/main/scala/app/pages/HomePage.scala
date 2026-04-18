@@ -1,7 +1,7 @@
 package app.pages
 
 import app.{ShowcaseCatalog, ShowcaseRoute}
-import jfx.action.Button.{button, onClick}
+import jfx.action.Button.button
 import jfx.control.Image.{alt, image, src}
 import jfx.core.component.CompositeComponent
 import jfx.core.component.CompositeComponent.composite

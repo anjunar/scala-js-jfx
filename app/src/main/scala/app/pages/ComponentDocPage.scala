@@ -1,6 +1,6 @@
 package app.pages
 import app.domain.{Address, Email, Person}
-import jfx.action.Button.{button, onClick}
+import jfx.action.Button.button
 import jfx.control.TableColumn
 import jfx.control.TableColumn.column
 import jfx.control.TableView

@@ -1,8 +1,8 @@
 package jfx.core.component
 
-import jfx.core.state.{ListProperty, Property, ReadOnlyProperty}
-import jfx.dsl.StyleTarget
-import org.scalajs.dom.{CSSStyleDeclaration, HTMLElement, Node, document}
+import jfx.core.state.{Disposable, ListProperty, Property, ReadOnlyProperty}
+import jfx.dsl.{DslRuntime, StyleTarget}
+import org.scalajs.dom.{CSSStyleDeclaration, Event, HTMLElement, Node, document}
 
 import scala.annotation.targetName
 import scala.collection.mutable
@@ -140,6 +140,23 @@ object ElementComponent {
       updateClasses(component) { current =>
         current.filterNot(removed.contains)
       }
+    }
+  }
+
+  def onClick(listener: Event => Unit)(using link: ElementComponent[?]): Disposable = {
+    DslRuntime.currentScope { currentScope =>
+      val currentContext = DslRuntime.currentComponentContext()
+      val wrapped: Event => Unit = event =>
+        DslRuntime.withScope(currentScope) {
+          DslRuntime.withComponentContext(currentContext) {
+            listener(event)
+          }
+        }
+
+      link.element.addEventListener("click", wrapped)
+      val disposable: Disposable = () => link.element.removeEventListener("click", wrapped)
+      link.addDisposable(disposable)
+      disposable
     }
   }
 

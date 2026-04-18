@@ -124,7 +124,7 @@ class FormPage extends CompositeComponent[HTMLDivElement] {
 
           div {
             classes = "clarity-hero__eyebrow"
-          text = "Forms"
+            text = "Forms"
           }
 
           div {
